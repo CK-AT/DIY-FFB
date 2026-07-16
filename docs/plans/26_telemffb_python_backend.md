@@ -116,8 +116,13 @@ ESP32 gateway → CAN → axis controller (unchanged)
   machinery.
 - The **wire codec**: our COBS + CRC16/Modbus framing (§4) and the vendored
   generated protobuf (§7).
-- **Serial device discovery** by USB VID/PID (`0x303b:0x8211`, fallback
-  `0xF011:0xF011`) via `pyserial` `list_ports`.
+- **Serial port selection.** The protobuf link is a **UART bridge** — a generic
+  USB-serial COM port (Arduino `Serial` = UART0 @ 3 Mbaud, since
+  `ARDUINO_USB_CDC_ON_BOOT=0`). It is **not** the native-USB device, so it does
+  **not** carry a DIY-specific VID/PID; auto-detecting by `0x303b`/gateway-PID
+  would be wrong (that identity is the HID gamepad — see the note below).
+  Discovery is therefore **user-selected COM port** (as the SimHub plugin does),
+  with optional matching by the bridge chip's VID/PID as a convenience only.
 - The single application branch point: a device-backend selector at
   [`main.py:360`](../../../VPforce-TelemFFB/main.py) plus a CLI/system-setting
   flag choosing the DIY backend and COM port.
@@ -142,6 +147,16 @@ ESP32 gateway → CAN → axis controller (unchanged)
 ---
 
 ## 4. Wire contract the backend must implement
+
+> **Two distinct USB interfaces — don't conflate them.** The gateway exposes
+> (1) a **native-USB HID gamepad** and (2) a **UART-bridge serial COM port**.
+> The runtime source of truth for the HID identity is
+> [`CommManager.cpp:114-127`](../../ESP32/src/CommManager.cpp#L114) (it
+> **overrides** the platformio `USB_PRODUCT`/`USB_PID` defines): VID `0x303b`,
+> PID `0x8210 + gateway_id` (gw1 = `0x8211`) / `0x8220 + axis_id`, product
+> `"DIY-FFB-Gateway-N"` / `"DIY-FFB-Axis-N"`. **This backend uses neither** — it
+> talks protobuf over the *UART-bridge* COM port (a separate, generic
+> USB-serial device). The `0x303b` identity is the HID gamepad only.
 
 Confirmed against the SimHub plugin ([FrameSerial.cs](../../SimHubPlugin/FrameSerial.cs),
 [DiyFfbPlugin.cs:100](../../SimHubPlugin/DiyFfbPlugin.cs#L100)) and firmware
@@ -415,8 +430,9 @@ glue lives in the fork.
     [`main.py:360`](../../../VPforce-TelemFFB/main.py): if the selected backend
     is `diy`, construct `DiyFfbDevice(port=...)` and assign
     `HapticEffect.device`.
-  - CLI/system-setting: `--backend diy --port COMx` (or auto-discover by
-    VID/PID). Reuse the existing `--type pedals|collective` for role.
+  - CLI/system-setting: `--backend diy --port COMx` (the UART-bridge COM port,
+    user-selected as in SimHub; §4 note). Reuse the existing
+    `--type pedals|collective` for role.
   - Connect the same Qt signals (`deviceConnected`, `buttonPressed`,
     `buttonReleased`) `main.py` already expects.
 
@@ -463,8 +479,9 @@ Ordered to reach the **LVAR-API hardware test** as early as possible; vibration
    tracks `ffbTrimCyclicRoll`/`ffbTrimCyclicPitch`, `_TR_ON` unclutch, hydraulic
    loss → friction, and per-axis `_FLY_THROUGH` write-back. Then repeat for
    collective/pedals as single-axis instances. **This is the goal.**
-5. **Discovery + selector + docs.** VID/PID auto-detect, `main.py` backend
-   branch, SimHub-exclusivity + companion-profile documentation.
+5. **Selector + docs.** `main.py` backend branch, user-selected UART-bridge COM
+   port (optionally convenience-matched by the bridge chip's VID/PID),
+   SimHub-exclusivity + companion-profile documentation.
 6. **Vibration (secondary).** Constant/periodic → DDS mapping + `DdsFundamentals`
    + software envelopes. Enables the broader effect library (engine rumble,
    gunfire, ETL) on our HW — not required for the API test.
