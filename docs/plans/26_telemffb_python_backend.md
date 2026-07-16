@@ -396,14 +396,20 @@ mixin needs changing.
 
 ## 8. Generated protobuf & code layout
 
-- Compile [`proto/diy_ffb_protocol.proto`](../../proto/diy_ffb_protocol.proto)
-  with `protoc --python_out` → `diy_ffb_protocol_pb2.py`, vendored under
-  `telemffb/hw/diy/`. Pin a regen script so it tracks proto changes.
-- New files:
-  - `telemffb/hw/ffb_diy.py` — `DiyFfbDevice(QObject)`, translating effect
-    handle, aggregator, serial threads, `get_input()` views.
-  - `telemffb/hw/diy/framing.py` — COBS + CRC16/Modbus codec.
-  - `telemffb/hw/diy/diy_ffb_protocol_pb2.py` — generated.
+**Split across two repos** — the protocol/transport/discovery foundation lives
+in *our* repo (authoritative, next to the `.proto`); only the TelemFFB-specific
+glue lives in the fork.
+
+- **This repo — [`tools/diy_ffb_bridge/`](../../tools/diy_ffb_bridge/) (built):**
+  `framing.py` (COBS + CRC16/Modbus), `broker.py` (port multiplexer),
+  `client.py` (`BrokerClient` + `Topology` discovery + `AxisStateTracker`
+  per-function position/force), generated `diy_ffb_protocol_pb2.py`
+  (`regen_proto.sh`), offline tests.
+- **TelemFFB fork — new file `telemffb/hw/ffb_diy.py`:** `DiyFfbDevice(QObject)`
+  — the FFBRhino-compatible glue. Imports the foundation (via `pip install -e`
+  of the bridge package, or a vendored copy), holds the effect table +
+  aggregator (→ per-function `FlightFfbAction`), and exposes `get_input()`
+  views over `AxisStateTracker`.
 - Application wiring (minimal):
   - A backend factory replacing the hard-coded `HapticEffect.open(...)` at
     [`main.py:360`](../../../VPforce-TelemFFB/main.py): if the selected backend
@@ -431,6 +437,12 @@ Ordered to reach the **LVAR-API hardware test** as early as possible; vibration
    decodes the uplink — the first **hardware** smoke test (run broker vs. a
    pedal flight-configured by SimHub, confirm `AxisState`/`GatewayState`/
    `DeviceInfo`). *Remaining: run that hardware smoke test.*
+1b. **✅ Client foundation (done).** `client.py` — `BrokerClient`, `Topology`
+   discovery (`GatewayState` + `return_function_config`), and `AxisStateTracker`
+   (per-function position = primary axis; force = signed sum, subtractive
+   negated — matching plugin `96ce7abf`). Offline tests green (`test_client.py`,
+   incl. the differential-pedal negation case + a full discovery/FFB round-trip
+   through the broker with a fake serial).
 2. **Condition-effect force path, single axis first.** `DiyFfbDevice` +
    spring/damper/friction + spring-center aggregation → one `FlightFfbAction`.
    Validate with a trivial TelemFFB profile (fixed spring). Confirm feel on

@@ -36,9 +36,10 @@ over loopback TCP (reliable, so no CRC/COBS there).
 |---|---|
 | `framing.py` | COBS + CRC16/Modbus codec; `StreamDecoder`. The wire core. |
 | `broker.py` | The broker (port owner + TCP fanout). Also the CLI. |
-| `monitor.py` | Client that decodes/prints the uplink; first hardware smoke test + `DiyFfbDevice` skeleton. |
+| `client.py` | Broker-client foundation: `BrokerClient`, `Topology` (discovery), `AxisStateTracker` (per-function position/force), `DiyFfbLink`. What the TelemFFB `DiyFfbDevice` builds on. |
+| `monitor.py` | Client that decodes/prints the uplink; first hardware smoke test. |
 | `diy_ffb_protocol_pb2.py` | Generated from `proto/diy_ffb_protocol.proto`. Regenerate with `./regen_proto.sh`. |
-| `test_framing.py`, `test_broker.py` | Offline tests (no hardware). |
+| `test_framing.py`, `test_broker.py`, `test_client.py` | Offline tests (no hardware). |
 
 ## Requirements
 
