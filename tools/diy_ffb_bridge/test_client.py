@@ -89,6 +89,57 @@ def test_differential_force_negates_subtractive():
     assert abs(st.function_position(PEDALS) - 0.10) < 1e-6
 
 
+class _FakeClient:
+    """Records sent messages; no socket. For DiyFfbLink discovery tests."""
+
+    def __init__(self):
+        self.sent = []
+
+    def on(self, payload_type, cb):
+        pass
+
+    def send(self, msg):
+        self.sent.append(msg)
+
+    def probed_axes(self):
+        return {m.axis_action.axis_id for m in self.sent
+                if m.WhichOneof("payload") == "axis_action"
+                and m.axis_action.return_function_config}
+
+
+def _gateway_state(bitmask):
+    m = pb.Message()
+    m.gateway_state.gateway_id = pb.GATEWAY_ID_1
+    m.gateway_state.axes_present = bitmask
+    return m
+
+
+def test_gateway_state_triggers_probe_once():
+    from client import DiyFfbLink
+    fake = _FakeClient()
+    link = DiyFfbLink(client=fake)
+    # first GatewayState reveals axes 1 & 2 -> both probed
+    link._on_gateway_state(_gateway_state(0b11))
+    assert fake.probed_axes() == {1, 2}
+    n = len(fake.sent)
+    # a repeat GatewayState (same axes) probes nothing new
+    link._on_gateway_state(_gateway_state(0b11))
+    assert len(fake.sent) == n
+
+
+def test_discovery_reprobes_on_hotplug():
+    from client import DiyFfbLink
+    fake = _FakeClient()
+    link = DiyFfbLink(client=fake)
+    link._on_gateway_state(_gateway_state(0b11))       # axes 1,2 probed
+    link._on_gateway_state(_gateway_state(0b01))       # axis 2 dropped
+    before = len(fake.sent)
+    link._on_gateway_state(_gateway_state(0b11))       # axis 2 back -> re-probe
+    reprobed = [m for m in fake.sent[before:]
+                if m.WhichOneof("payload") == "axis_action"]
+    assert [m.axis_action.axis_id for m in reprobed] == [2]
+
+
 def test_unknown_function_and_axis_default_zero():
     st = AxisStateTracker(Topology())
     assert st.function_force(CYCLIC_ROLL) == 0.0
@@ -108,7 +159,8 @@ def test_link_discovery_and_ffb_roundtrip():
         link.start()
         time.sleep(0.1)
 
-        # Gateway announces axes 1 & 2 (a cyclic).
+        # Gateway announces axes 1 & 2 (a cyclic) -> event-driven discovery
+        # auto-probes both axes (no manual request_discovery needed).
         gs = pb.Message()
         gs.gateway_state.gateway_id = pb.GATEWAY_ID_1
         gs.gateway_state.axes_present = 0b11
@@ -116,9 +168,6 @@ def test_link_discovery_and_ffb_roundtrip():
         time.sleep(0.1)
         assert link.topo.present_axes == {1, 2}
 
-        # Discovery probe -> broker forwarded two AxisActions onto the wire.
-        link.request_discovery()
-        time.sleep(0.1)
         dec = StreamDecoder()
         probes = [pb.Message.FromString(p) for p in dec.feed(bytes(ser.written))]
         probed_axes = {m.axis_action.axis_id for m in probes

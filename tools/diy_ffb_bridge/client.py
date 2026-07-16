@@ -204,16 +204,19 @@ class BrokerClient:
 class DiyFfbLink:
     """High-level orchestration: connection + discovery + state tracking.
 
-    Discovery is passive-plus-probe: watch ``GatewayState`` for the live axes,
-    then probe each with ``return_function_config`` and absorb the replies. Call
-    :meth:`request_discovery` after connecting; topology fills in asynchronously
-    as replies arrive.
+    Discovery is **event-driven**: `GatewayState` reveals the live axes, and each
+    newly-present axis is probed once with `return_function_config`; the reply
+    fills in the topology. This is self-healing — an axis that appears (or
+    reappears after dropping) is re-probed on the next `GatewayState`. It fixes
+    the earlier bug where a one-shot probe at connect ran before any
+    `GatewayState` arrived (empty `present_axes` -> nothing discovered).
     """
 
     def __init__(self, client: Optional[BrokerClient] = None):
         self.client = client or BrokerClient()
         self.topo = Topology()
         self.state = AxisStateTracker(self.topo)
+        self._probed: Set[int] = set()   # axes a probe has been sent for
         self.client.on("gateway_state", self._on_gateway_state)
         self.client.on("function_config", self._on_function_config)
         self.client.on("axis_state", self._on_axis_state)
@@ -221,13 +224,18 @@ class DiyFfbLink:
     def start(self) -> None:
         self.client.connect()
 
+    def _send_probe(self, axis: int) -> None:
+        msg = pb.Message()
+        msg.axis_action.axis_id = axis
+        msg.axis_action.return_function_config = True
+        self.client.send(msg)
+
     def request_discovery(self) -> None:
-        """Ask each present axis for its FunctionConfig (topology reply)."""
+        """Manually (re)probe every currently-present axis now. Discovery is
+        normally automatic via `GatewayState`; use this to force a re-probe."""
+        self._probed = set(self.topo.present_axes)
         for axis in sorted(self.topo.present_axes):
-            msg = pb.Message()
-            msg.axis_action.axis_id = axis
-            msg.axis_action.return_function_config = True
-            self.client.send(msg)
+            self._send_probe(axis)
 
     def send_flight_ffb(self, function_id: int, action: pb.FlightFfbAction) -> None:
         msg = pb.Message()
@@ -237,7 +245,13 @@ class DiyFfbLink:
 
     # --- handlers ----------------------------------------------------------
     def _on_gateway_state(self, msg: pb.Message) -> None:
-        self.topo.note_gateway_state(msg.gateway_state)
+        present = self.topo.note_gateway_state(msg.gateway_state)
+        # Forget axes that dropped, so a reappearing axis is re-probed.
+        self._probed &= present
+        # Probe each newly-present axis exactly once (reply fills topology).
+        for axis in sorted(present - self._probed):
+            self._send_probe(axis)
+            self._probed.add(axis)
 
     def _on_function_config(self, msg: pb.Message) -> None:
         self.topo.note_function_config(msg.function_config)
