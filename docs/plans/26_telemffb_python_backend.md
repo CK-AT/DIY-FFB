@@ -443,17 +443,20 @@ Ordered to reach the **LVAR-API hardware test** as early as possible; vibration
    negated — matching plugin `96ce7abf`). Offline tests green (`test_client.py`,
    incl. the differential-pedal negation case + a full discovery/FFB round-trip
    through the broker with a fake serial).
-2. **Condition-effect force path, single axis first.** `DiyFfbDevice` +
-   spring/damper/friction + spring-center aggregation → one `FlightFfbAction`.
-   Validate with a trivial TelemFFB profile (fixed spring). Confirm feel on
-   hardware. *(This is the path `FFBApiHelicopter` exercises — spring toward
-   `_TRIM`, soften on `_TR_ON`, friction from `_HYD_ASSIST_LOSS`.)*
-3. **Two-axis cyclic fan-out (§6.1).** Split X/Y → roll/pitch functions, emit
-   two `FFBAction`s/tick, and assemble both `AxisState`s into `axisXY()`/
-   `forceXY()`. Verify independent per-axis spring/center and force-based
-   **fly-through** per axis. **This is the primary device shape** — most users
-   have a cyclic, so the API's cyclic path must be exercised here, not just
-   collective/pedals.
+2. **✅ Aggregator + `DiyFfbDevice` glue (written; HW-validation pending).**
+   `aggregator.py` (`EffectAggregator`) collapses spring/damper/friction/constant
+   + spring-center → per-function `FlightFfbAction`; offline tests green
+   (`test_aggregator.py`). Fork-side `telemffb/hw/ffb_diy.py` (`DiyFfbDevice`,
+   branch `ck_diy_ffb_bridge`) reuses `HapticEffect`/`FFBEffectHandle`, parses
+   the report stream into the aggregator, ticks per-function `FlightFfbAction`,
+   and builds `get_input()`. *Syntax-checked only — not yet run in the TelemFFB
+   env (needs PyQt6/hidapi); no hardware feel test yet.* *(Path `FFBApiHelicopter`
+   exercises: spring→`_TRIM`, soften on `_TR_ON`, friction from `_HYD_ASSIST_LOSS`.)*
+3. **✅ Two-axis cyclic fan-out (§6.1) — implemented.** X→roll / Y→pitch split in
+   both the aggregator (two `FlightFfbAction`s/tick) and `get_input()` (two
+   `AxisState`s → `axisXY()`/`forceXY()`); tested offline in `test_aggregator.py`.
+   *Remaining: verify per-axis feel + force-based fly-through on hardware.*
+   **This is the primary device shape** — most users have a cyclic.
 4. **LVAR-API end-to-end (cyclic).** With the aircraft-side stub (§5), run
    TelemFFB's `FFBApiHelicopter` as the **cyclic (`joystick`) instance** driving
    both stick functions: confirm `_ENABLED` lifecycle, per-axis spring-center
