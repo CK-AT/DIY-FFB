@@ -2959,8 +2959,12 @@ namespace DiyFfb
         /// LinkedAxes entry satisfies <paramref name="match"/> (null = all). The
         /// physical AxisID (the force-cache key) is recovered by masking off the
         /// direction flags; unassigned (AxisUndefined) slots are skipped.
+        /// When <paramref name="applyDirection"/> is true, subtractive axes
+        /// contribute with a negated sign (per the AxisSubtractive convention),
+        /// giving the NET directional force; when false, raw forces are summed.
         /// </summary>
-        private double SumLinkedAxisForce(FunctionID functionId, Func<AxisID, bool> match)
+        private double SumLinkedAxisForce(FunctionID functionId, Func<AxisID, bool> match,
+                                          bool applyDirection = false)
         {
             var config = _functionConfigManager.GetCurrentConfig((int)functionId);
             if (config?.Base == null) return 0.0;
@@ -2969,19 +2973,23 @@ namespace DiyFfb
             {
                 var physical = linked & AxisID.Mask;
                 if (physical == AxisID.AxisUndefined) continue;
-                if (match == null || match(linked)) sum += GetLastAxisForce(physical);
+                if (match != null && !match(linked)) continue;
+                double f = GetLastAxisForce(physical);
+                if (applyDirection && (linked & AxisID.AxisSubtractive) != 0) f = -f;
+                sum += f;
             }
             return sum;
         }
 
         /// <summary>
-        /// Returns the force (N) for the given function, summed across ALL its
-        /// assigned linked axes. Single-axis functions (stick pitch/roll,
-        /// collective) reduce to that one axis today; summing generalizes cleanly
-        /// to future multi-axis setups (e.g. copilot axes) without changing callers.
+        /// Returns the NET force (N) for the given function, combined across ALL
+        /// its assigned linked axes with the AxisSubtractive direction convention
+        /// (subtractive axes are negated). Single-axis functions (stick
+        /// pitch/roll, collective) reduce to that one axis; multi-axis setups
+        /// (e.g. a differential/dual-actuator function) combine directionally.
         /// </summary>
         internal double GetFunctionForce(FunctionID functionId) =>
-            SumLinkedAxisForce(functionId, null);
+            SumLinkedAxisForce(functionId, null, applyDirection: true);
 
         /// <summary>
         /// Returns the summed force (N) of the flight-pedals axes on one side.
