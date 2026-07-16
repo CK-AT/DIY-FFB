@@ -48,6 +48,8 @@ class Topology:
     def __init__(self) -> None:
         # function_id -> raw linked_axes entries (flags preserved), primary first
         self._linked: Dict[int, List[int]] = {}
+        # function_id -> (pos_min, pos_max) mm, from FlightControlConfig
+        self._pos_range: Dict[int, tuple] = {}
         self.present_axes: Set[int] = set()
 
     # --- discovery inputs --------------------------------------------------
@@ -63,6 +65,9 @@ class Topology:
         linked = [a for a in fc.base.linked_axes if physical(a) != pb.AXIS_UNDEFINED]
         if fn != pb.FUNCTION_ID_UNDEFINED and linked:
             self._linked[fn] = linked
+            if fc.HasField("flight_control"):
+                self._pos_range[fn] = (fc.flight_control.pos_min,
+                                       fc.flight_control.pos_max)
 
     # --- queries -----------------------------------------------------------
     def functions(self) -> List[int]:
@@ -74,6 +79,10 @@ class Topology:
     def primary_axis(self, function_id: int) -> Optional[int]:
         linked = self._linked.get(function_id)
         return physical(linked[0]) if linked else None
+
+    def pos_range(self, function_id: int) -> Optional[tuple]:
+        """(pos_min, pos_max) in mm for a flight-control function, else None."""
+        return self._pos_range.get(function_id)
 
     def function_of_axis(self, phys_axis: int) -> Optional[int]:
         for fn, linked in self._linked.items():

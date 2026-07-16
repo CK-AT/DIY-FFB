@@ -47,6 +47,18 @@ def test_topology_axis_function_maps():
     assert topo.function_of_axis(5) is None
 
 
+def test_topology_captures_flight_control_range():
+    topo = Topology()
+    fc = _function_config(CYCLIC_PITCH, [pb.AXIS_ID_2])
+    fc.flight_control.pos_min = -40
+    fc.flight_control.pos_max = 40
+    topo.note_function_config(fc)
+    assert topo.pos_range(CYCLIC_PITCH) == (-40, 40)
+    # a function with no flight_control config -> None
+    topo.note_function_config(_function_config(CYCLIC_ROLL, [pb.AXIS_ID_1]))
+    assert topo.pos_range(CYCLIC_ROLL) is None
+
+
 # --- single-axis (cyclic) combination ---------------------------------------
 def test_single_axis_position_and_force():
     topo = Topology()
