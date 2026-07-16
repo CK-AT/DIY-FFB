@@ -479,9 +479,11 @@ Ordered to reach the **LVAR-API hardware test** as early as possible; vibration
    tracks `ffbTrimCyclicRoll`/`ffbTrimCyclicPitch`, `_TR_ON` unclutch, hydraulic
    loss → friction, and per-axis `_FLY_THROUGH` write-back. Then repeat for
    collective/pedals as single-axis instances. **This is the goal.**
-5. **Selector + docs.** `main.py` backend branch, user-selected UART-bridge COM
-   port (optionally convenience-matched by the bridge chip's VID/PID),
-   SimHub-exclusivity + companion-profile documentation.
+5. **✅ Selector wired (docs pending).** `main.py` branches on `--backend diy
+   [--broker HOST:PORT]` → `open_diy_device` → `HapticEffect.device`, bypassing
+   the Rhino HID open (`CmdLineArgs` extended; syntax-checked). *Remaining: the
+   broker owns the UART-bridge COM port (user-selected, as SimHub); write up
+   SimHub-exclusivity + companion-profile docs.*
 6. **Vibration (secondary).** Constant/periodic → DDS mapping + `DdsFundamentals`
    + software envelopes. Enables the broader effect library (engine rumble,
    gunfire, ETL) on our HW — not required for the API test.
