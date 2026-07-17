@@ -155,11 +155,13 @@ Recommend **(A)** until it proves worth extracting.
 
 ## 7. Phasing (MVP)
 
-1. **Host-side references editor (first shot, §2.1).** Edit the per-function
-   `AxisReferences` (`spring_n_per_mm`, `damper_ns_per_mm`, **`base_damping`**,
-   `friction_n`, `load_n`); persist to a host config file; `DiyFfbDevice` loads
-   it (re-reads on change) so values apply live. Safety-first: get real base
-   damping on every axis. Needs no broker — pure host-side scaling.
+1. **Host-side references config (first shot, §2.1) — ✅ file + live reload done.**
+   `references.py`: human-editable per-function JSON (`spring_n_per_mm`,
+   `damper_ns_per_mm`, **`base_damping`**, `friction_n`, `load_n`), template
+   written on first run, malformed-safe. `DiyFfbDevice` loads it at open and
+   **re-reads live** (~1×/s) so edits apply while driving; `--references PATH`
+   (default = platform config dir). No broker — pure host-side scaling. Tests
+   green. *Remaining: a GUI editor on top of the JSON (nice-to-have).*
 2. **Live feedback + host control channel.** Read live `AxisState`
    (position/force) — via the running `DiyFfbDevice` (host IPC) or a broker
    client — so references can be tuned while TelemFFB drives, seeing the effect.
