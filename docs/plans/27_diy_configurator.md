@@ -59,9 +59,34 @@ SimHub plugin." Two viable framings — **decide the intent before building**:
 
 The rest of this plan assumes **(A)**, with a note where (B) would extend it.
 
+### 2.1 First shot: tune the host-side references (not ESP32 config)
+
+The **very first shot is narrower and safety-driven**: tune the **`DiyFfbDevice`
+references** — the host-side scaling that turns TelemFFB's 0..1 ratios into the
+absolute N / mm / N·s/mm the firmware consumes (Plan 26 §6.0). These live
+**host-side** (`AxisReferences` per function), because the firmware already
+runs on absolute units; TelemFFB just has to scale correctly before sending.
+
+Per function: `spring_n_per_mm`, `damper_ns_per_mm`, **`base_damping_ns_per_mm`
+(safety floor — never zero)**, `friction_n`, `load_n` (trim range comes from
+discovery). The aggregator already applies these with conservative, over-damped
+placeholder defaults; the configurator's job #1 is exposing them so each rig
+gets **safe, tuned** values — most importantly a real base damping so a
+direct-drive axis is never left undamped.
+
+**These references never go to the gateway** — they're applied host-side before
+the `FlightFfbAction` is built. So editing them doesn't need the broker; the
+live-update path is a **host channel to the running `DiyFfbDevice`** (re-read a
+per-function config file, or a small control socket / TelemFFB IPC), *not* the
+broker. The broker passthrough (below) is for the *later* ESP32-config editing
+and for live `AxisState` feedback while tuning.
+
+Persist as a host-side per-function config file (loaded by `DiyFfbDevice` at
+open, re-read on change). ESP32 config editing (§3) is a subsequent phase.
+
 ---
 
-## 3. Config surface (what it reads/writes)
+## 3. Config surface — later phase (ESP32 config via broker)
 
 All already defined in [`diy_ffb_protocol.proto`](../../proto/diy_ffb_protocol.proto):
 
@@ -130,17 +155,20 @@ Recommend **(A)** until it proves worth extracting.
 
 ## 7. Phasing (MVP)
 
-1. **Read-only inspector.** Connect via broker, run discovery, display current
-   `AxisConfig`/`FunctionConfig` + live `AxisState`. Proves the passthrough
-   end-to-end with zero risk (no writes).
-2. **Per-function feel editing.** Edit + Apply `FlightControlConfig`
-   (`centering_spring_const`, `damping`, output range, DDS harmonics) + friction;
-   Store to device. Validate live while TelemFFB drives.
-3. **Per-axis + calibration.** `AxisConfig` (oscillation guard, kinematics),
-   `start_homing` / `start_static_balance_calibration` → show `StaticBalanceResult`.
-4. **Profiles.** Save/load `ConfigItemsList` files.
-5. **TelemFFB launch button** wired for `--backend diy`.
-6. *(Later / framing B)* richer authoring (force curves, graph) if we commit to
+1. **Host-side references editor (first shot, §2.1).** Edit the per-function
+   `AxisReferences` (`spring_n_per_mm`, `damper_ns_per_mm`, **`base_damping`**,
+   `friction_n`, `load_n`); persist to a host config file; `DiyFfbDevice` loads
+   it (re-reads on change) so values apply live. Safety-first: get real base
+   damping on every axis. Needs no broker — pure host-side scaling.
+2. **Live feedback + host control channel.** Read live `AxisState`
+   (position/force) — via the running `DiyFfbDevice` (host IPC) or a broker
+   client — so references can be tuned while TelemFFB drives, seeing the effect.
+3. **TelemFFB launch button** wired for `--backend diy` → spawn the configurator.
+4. *(Later)* **ESP32 config editing via broker** — `AxisConfig`/`FunctionConfig`
+   (kinematics, DDS ratios, oscillation guard), `AxisAction` calibration
+   (homing, static balance → `StaticBalanceResult`), `ConfigItemsList` profiles.
+   This is where the broker passthrough (§1) is used.
+5. *(Later / framing B)* richer authoring (force curves, graph) if we commit to
    replacing SimHub for DIY.
 
 ## 8. Risks / open questions

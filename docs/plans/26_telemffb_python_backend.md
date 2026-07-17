@@ -302,6 +302,34 @@ coefficients arrive from TelemFFB as raw ints where **4096 = 1.0 gain**.
 | `DETENT` | condition block | *(v1: drop, log)* | No detent semantics on our axes; future. |
 | Device/master gain (`set_gain`, `FFB_GAIN_*`) | 0..100 | scales all outputs | Maintain a gain vector; apply per class. |
 
+### 6.0 Ratios → absolute units, and the base-damping safety floor
+
+**Critical:** TelemFFB emits every effect as a **0..1 ratio to a baseline**, but
+the firmware consumes `FlightFfbAction` in **absolute physical units** — `k_spring`
+is N/mm, `k_damper` is N·s/mm, `k_friction`/`load_force` are N, `trim_offset` is
+mm (it runs the physics on real units; `flight.k_damper` sits in the same units
+as `FlightControlConfig.damping`, [FlightControlFunction.cpp:52](../../ESP32/src/FlightControlFunction.cpp#L52)).
+So the aggregator must **scale each ratio by a per-function reference** before
+sending — the references live **host-side in `DiyFfbDevice`** (`AxisReferences`),
+because the device is already the absolute baseline; we just pick where "ratio
+1.0" lands:
+
+```
+k_spring   = spring_coef   × spring_n_per_mm   × gain
+k_damper   = base_damping  + damper_coef × damper_ns_per_mm × gain
+k_friction = friction_coef × friction_n        × gain
+load_force = load_ratio    × load_n            × gain
+trim_offset= trim_norm     × trim_mm_half_range          (from discovered range)
+```
+
+**`base_damping_ns_per_mm` is a safety floor** — always added, never scaled away
+by gain — so a direct-drive axis is **never left undamped** (ratio 0, or between
+effects). Under-damped direct drive oscillates dangerously; the floor prevents
+that host-side (the ESP32's `AxisConfig.min_damping` / rest-damping remains the
+independent *no-frames* floor). These references are exactly what the DIY
+configurator (Plan 27) tunes. *(Implemented — supersedes the "Σ coef/4096"
+shorthand in the table above, which showed the ratio before scaling.)*
+
 ### 6.1 Two-axis cyclic fan-out (the primary path)
 
 Our cyclic is **two independent functions** — `FUNCTION_ID_FLIGHT_STICK_ROLL`
