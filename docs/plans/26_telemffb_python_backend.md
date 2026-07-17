@@ -259,6 +259,15 @@ functions over the one port (§6.1). One process, one port, no collision.
    master/child, one-SimConnect-per-instance, one-control-per-instance design
    (rig-plan §4, §6). More invasive than the broker for no upside.
 
+**Auto-start + propagation (done).** The **master** instance auto-starts the
+broker in-process when run with `--backend diy --broker-serial COMx`
+(`_start_diy_broker` in `main.py`; owns the gateway port before any instance
+connects), and `check_launch_instance` **propagates `--backend`/`--broker` to
+autolaunched children** so cyclic + collective + pedals all come up in DIY mode
+and connect to that one broker. `BrokerClient.connect` retries briefly to
+tolerate a child racing ahead of the master's broker. So the whole rig is one
+command: `python main.py --backend diy --broker-serial COMx`.
+
 **Decision: build the broker first** (not deferred). It is a thin
 port-multiplexer, it decouples the serial transport from TelemFFB entirely (the
 codec lives in the broker, not smeared across instances), and it means we never
@@ -483,11 +492,13 @@ Ordered to reach the **LVAR-API hardware test** as early as possible; vibration
    tracks `ffbTrimCyclicRoll`/`ffbTrimCyclicPitch`, `_TR_ON` unclutch, hydraulic
    loss → friction, and per-axis `_FLY_THROUGH` write-back. Then repeat for
    collective/pedals as single-axis instances. **This is the goal.**
-5. **✅ Selector wired (docs pending).** `main.py` branches on `--backend diy
-   [--broker HOST:PORT]` → `open_diy_device` → `HapticEffect.device`, bypassing
-   the Rhino HID open (`CmdLineArgs` extended; syntax-checked). *Remaining: the
-   broker owns the UART-bridge COM port (user-selected, as SimHub); write up
-   SimHub-exclusivity + companion-profile docs.*
+5. **✅ Selector + auto-start + child propagation (docs pending).** `main.py`
+   branches on `--backend diy` → `open_diy_device` → `HapticEffect.device`
+   (bypassing the Rhino HID open); the master auto-starts the in-process broker
+   from `--broker-serial COMx` and `check_launch_instance` propagates the DIY
+   backend to children — whole rig via `python main.py --backend diy
+   --broker-serial COMx`. *Remaining: SimHub-exclusivity + companion-profile
+   docs; run it on hardware.*
 6. **Vibration (secondary).** Constant/periodic → DDS mapping + `DdsFundamentals`
    + software envelopes. Enables the broader effect library (engine rumble,
    gunfire, ETL) on our HW — not required for the API test.
