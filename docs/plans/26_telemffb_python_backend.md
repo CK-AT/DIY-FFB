@@ -262,10 +262,10 @@ functions over the one port (§6.1). One process, one port, no collision.
 **Decision: build the broker first** (not deferred). It is a thin
 port-multiplexer, it decouples the serial transport from TelemFFB entirely (the
 codec lives in the broker, not smeared across instances), and it means we never
-build a direct-port version only to rip it out. **Status: built** — see
-[`tools/diy_ffb_bridge/`](../../tools/diy_ffb_bridge/) (`framing.py`,
-`broker.py`, `monitor.py`, offline tests green). Even the single-instance cyclic
-case now connects through the broker.
+build a direct-port version only to rip it out. **Status: built** — vendored in
+the fork at `telemffb/hw/diy/` (`framing.py`, `broker.py`, `monitor.py`, offline
+tests green). Even the single-instance cyclic case now connects through the
+broker.
 
 ---
 
@@ -411,20 +411,24 @@ mixin needs changing.
 
 ## 8. Generated protobuf & code layout
 
-**Split across two repos** — the protocol/transport/discovery foundation lives
-in *our* repo (authoritative, next to the `.proto`); only the TelemFFB-specific
-glue lives in the fork.
+**The bridge is vendored into the TelemFFB fork** as a self-contained package
+`telemffb/hw/diy/`, so the feature branch is complete and transferable (one
+repo, normal package imports, no path shim). This repo keeps only the
+**authoritative `.proto`** (`proto/diy_ffb_protocol.proto`, shared with the
+firmware + SimHub plugin); the fork's `diy/regen_proto.sh` regenerates the
+vendored `diy_ffb_protocol_pb2.py` from it (dev-time cross-repo path, not a
+runtime concern).
 
-- **This repo — [`tools/diy_ffb_bridge/`](../../tools/diy_ffb_bridge/) (built):**
-  `framing.py` (COBS + CRC16/Modbus), `broker.py` (port multiplexer),
-  `client.py` (`BrokerClient` + `Topology` discovery + `AxisStateTracker`
-  per-function position/force), generated `diy_ffb_protocol_pb2.py`
-  (`regen_proto.sh`), offline tests.
-- **TelemFFB fork — new file `telemffb/hw/ffb_diy.py`:** `DiyFfbDevice(QObject)`
-  — the FFBRhino-compatible glue. Imports the foundation (via `pip install -e`
-  of the bridge package, or a vendored copy), holds the effect table +
-  aggregator (→ per-function `FlightFfbAction`), and exposes `get_input()`
-  views over `AxisStateTracker`.
+- **Fork — `telemffb/hw/diy/` (built, vendored):** `framing.py` (COBS +
+  CRC16/Modbus), `broker.py` (port multiplexer), `client.py` (`BrokerClient` +
+  `Topology` discovery + `AxisStateTracker`), `aggregator.py`
+  (`EffectAggregator`), `monitor.py`, generated `diy_ffb_protocol_pb2.py`,
+  offline tests. Run scripts/tests as package modules: `python -m
+  telemffb.hw.diy.broker`, `… .test_client`, etc.
+- **Fork — `telemffb/hw/ffb_diy.py`:** `DiyFfbDevice(QObject)`, the
+  FFBRhino-compatible glue. Imports the package directly (`from telemffb.hw.diy
+  import …` — no shim), holds the effect table + aggregator (→ per-function
+  `FlightFfbAction`), and exposes `get_input()` views over `AxisStateTracker`.
 - Application wiring (minimal):
   - A backend factory replacing the hard-coded `HapticEffect.open(...)` at
     [`main.py:360`](../../../VPforce-TelemFFB/main.py): if the selected backend
@@ -448,11 +452,11 @@ Ordered to reach the **LVAR-API hardware test** as early as possible; vibration
 (off the critical path for that goal) trails.
 
 1. **✅ Broker + codec (done).** COBS/CRC framing + protocol-agnostic serial
-   broker (owns port, fans out to clients), in [`tools/diy_ffb_bridge/`](../../tools/diy_ffb_bridge/).
-   Offline tests green (`test_framing.py`, `test_broker.py`). `monitor.py`
-   decodes the uplink — the first **hardware** smoke test (run broker vs. a
-   pedal flight-configured by SimHub, confirm `AxisState`/`GatewayState`/
-   `DeviceInfo`). *Remaining: run that hardware smoke test.*
+   broker (owns port, fans out to clients), vendored in the fork at
+   `telemffb/hw/diy/`. Offline tests green (`test_framing`, `test_broker`).
+   `monitor.py` decodes the uplink — the first **hardware** smoke test (run
+   broker vs. the rig flight-configured by SimHub, confirm `AxisState`/
+   `GatewayState`/`DeviceInfo`). *Remaining: run that hardware smoke test.*
 1b. **✅ Client foundation (done).** `client.py` — `BrokerClient`, `Topology`
    discovery (`GatewayState` + `return_function_config`), and `AxisStateTracker`
    (per-function position = primary axis; force = signed sum, subtractive
