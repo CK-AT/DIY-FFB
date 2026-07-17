@@ -408,12 +408,13 @@ function's into Y:
 - commanded `trim_offset` per function → `CP_XY()` (x=roll, y=pitch).
 - Single-axis roles (collective/pedals) populate one component; the other stays
   neutral (0).
-- Buttons: grip buttons ride the gateway's **native-USB HID gamepad** (`0x303b`,
-  `DIY-FFB-*`), not the FFB serial link. `DiyFfbDevice` opens that gamepad via
-  TelemFFB's hidapi (`buttons.py`), decodes the 48-button bitfield into
-  `Button0_31`/`Button32_47`, and emits press/release edges — so device-button
-  features (force-trim, spring-override, binding UI) work. No firmware change
-  (`CommManager` already folds the grip bits into that gamepad's buttons).
+- Buttons: ride the ESP32s' **native-USB HID gamepads** (`0x303b`, `DIY-FFB-*`),
+  not the FFB serial link. `DiyFfbDevice` opens **all** DIY gamepads (gateway +
+  each axis) via TelemFFB's hidapi (`buttons.py`) and **ORs** their 48-button
+  bitfields into `Button0_31`/`Button32_47`, emitting press/release edges — so
+  the grip works wherever it's wired and device-button features (force-trim,
+  spring-override, binding UI) work. No firmware change (`CommManager` already
+  folds the grip bits into each gamepad's buttons).
 
 Provide these as small view objects mirroring `FFBReport_Input`'s helpers so no
 mixin needs changing.
