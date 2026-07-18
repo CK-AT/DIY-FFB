@@ -2,11 +2,18 @@
 
 Give TelemFFB a **typed MSFS write layer** — target an `A:` sim var, `L:` local
 var, `K:` key event, or `B:` input event, chosen per binding — and route the
-**controlled axis** (`telemffb_controls_axes`) through it. Immediate driver: the
-axis-choppiness bug is that `AXIS_*_SET` (a `K:` key event) is applied by MSFS at
-~2 Hz; writing the same value as an `A:` sim var is smooth (that's how SimHub
-does it). Generalizing to all four types mirrors SimHub's Plan 24 `MsfsVarOut`
-and serves the FFB-API writes too.
+**controlled axis** (`telemffb_controls_axes`) through it. Two drivers: (1) fix
+the axis-choppiness bug (see §1 — it's a missing SimConnect **priority flag**,
+not the var type), and (2) generalize output to all four types, mirroring
+SimHub's Plan 24 `MsfsVarOut`, which also serves the FFB-API writes and pedal
+control (SimHub drives H500C pedals via `B:PEDALS_PRESET`).
+
+> **Root cause corrected.** Earlier this plan blamed the `K:` mechanism and
+> proposed switching to `A:`. **Wrong** — SimHub streams the *same*
+> `K:AXIS_CYCLIC_LATERAL_SET` / `…LONGITUDINAL_SET` / `AXIS_COLLECTIVE_SET`
+> events to the H500C *smoothly*. The real difference is the SimConnect send
+> flags (§1). So the immediate fix is **one flag on the existing K: send**, not
+> a switch to `A:`.
 
 **Related:** [Plan 26](26_telemffb_python_backend.md) (DIY backend), the FFB-API
 rig-side impl (writes `L:FFB_*`), and SimHub's Plan 24 (`A:`/`L:`/`K:`/`B:`
@@ -26,11 +33,17 @@ to end on the rig:
   fully fast.
 - MSFS animates the control at **~2 Hz**.
 
-So MSFS applies **streamed `AXIS_*_SET` key events** at ~2 Hz. SimHub never hits
-this because it drives control axes via **`A:` sim-var writes**
-(`SetDataOnSimObject`), a different mechanism. Fix = let TelemFFB write the axis
-that way too — and, while we're there, make the *target type* a first-class
-choice.
+TelemFFB is sending fine; MSFS applies it slowly. But **not because it's a `K:`
+event** — SimHub streams the *same* `K:AXIS_CYCLIC_LATERAL_SET` etc. to the
+H500C smoothly (graph template `heli_unboosted_msfs.json`). The difference is the
+`TransmitClientEvent` **flags**: SimHub sends with
+`groupId = SIMCONNECT_GROUP_PRIORITY_HIGHEST` +
+`flags = SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY`
+([MsfsSimConnectClient.cs:962](../../SimHubPlugin/Msfs/MsfsSimConnectClient.cs#L962)),
+so MSFS applies it every frame. TelemFFB's `send_event` sends with (almost
+certainly) group 0 / no flags, so MSFS parks it in a low-priority group serviced
+~2 Hz. **Fix = send the axis events with that priority flag** — same event, same
+mechanism, one flag.
 
 ## 2. Current TelemFFB capability (the gap)
 
@@ -38,12 +51,14 @@ choice.
 |------|-----------|--------------------|
 | `A:` sim var | `set_simdatum_to_msfs` → `SetDataOnSimObject` | ✅ supported |
 | `L:` local var | `send_event_to_msfs('L:…')` → `set_simdatum` | ✅ supported |
-| `K:` key event | `send_event_to_msfs` → `TransmitClientEvent` | ✅ supported (choppy when streamed) |
-| `B:` input event | `SetInputEvent` (enumerate → hash → set) | ❌ **missing** — net-new |
+| `K:` key event | `send_event_to_msfs` → `TransmitClientEvent` | ✅ supported, but **without the priority flag** → choppy when streamed (§1) |
+| `B:` input event | `SetInputEvent` (enumerate → hash → set) | ❌ **missing** — net-new (SimHub uses it for H500C pedals: `B:PEDALS_PRESET`) |
 
-So the work is: (a) add the **`B:` transport**, (b) a small **typed dispatch**
-that routes a `prefix:name` target to the right mechanism, (c) a **per-axis
-output binding** so `telemffb_controls_axes` uses it (default `A:`).
+So the work is: (a) **send `K:` axis events with the `GROUPID_IS_PRIORITY` +
+`HIGHEST` flag** (the actual choppiness fix), (b) add the **`B:` transport**
+(needed for pedals parity + general use), (c) a small **typed dispatch** routing
+a `prefix:name` target to the right mechanism, (d) a **per-axis output binding**
+so `telemffb_controls_axes` can target any type.
 
 ## 3. Design
 
@@ -67,40 +82,41 @@ Rebuild the hash map on aircraft change. This is the only genuinely new SC code.
 ### 3.3 Per-axis output binding
 Each controlled axis gets a configurable target instead of the hard-coded
 `AXIS_*_SET`:
-- `target` (e.g. `A:YOKE Y POSITION`, or a `B:`/`K:`/`L:` name),
-- `units` and value **range/scale** (normalized → target units),
-- default = the **`A:` sim var** equivalent of today's `AXIS_*_SET`, so the
-  choppiness is fixed out of the box.
+- `target` — a `K:`/`A:`/`L:`/`B:` name,
+- `units` and value **range/scale** (normalized → target units).
 
-Lives in the aircraft config next to `telemffb_controls_axes` (per axis:
-cyclic lat/long, collective, tail rotor). Falls back to `AXIS_*_SET` (`K:`) if
-no target is set, preserving current behavior for non-DIY users.
+Defaults follow the H500C graph (proven smooth): **`K:AXIS_CYCLIC_LATERAL_SET`
+/ `…LONGITUDINAL_SET` / `AXIS_COLLECTIVE_SET`** for cyclic+collective (now with
+the priority flag), **`B:PEDALS_PRESET`** for pedals. Lives in the aircraft
+config next to `telemffb_controls_axes`. Plain `AXIS_*_SET` (`K:`, no flag)
+remains the fallback for non-DIY users — but note the flag fix (§4) makes even
+that smooth, so it's a strict improvement.
 
 ## 4. First application — fix the axis choppiness
-Wire the heli/flight controls mixins' axis send through `write_var(target, …)`
-with the per-axis binding, default `A:`. Re-measure with `DIY_AXIS_DEBUG` +
-watch the sim: the animation should track at frame rate. Ship the `A:` default;
-`B:`/`K:`/`L:` become available for cases where the right target is an input
-event or a bespoke L:var.
-
-**Open item (needs your SimHub knowledge):** the exact `A:` vars + units/ranges
-SimHub writes for each control axis — cyclic lateral/longitudinal, collective,
-tail rotor. Those become the built-in defaults.
+Send the streamed `K:AXIS_*_SET` events with `groupId = GROUP_PRIORITY_HIGHEST`
+and `flags = EVENT_FLAG_GROUPID_IS_PRIORITY`, matching SimHub. Confirm on the sim
+PC whether pysimconnect's `send_event` exposes group/flags (→ pass them) or not
+(→ add a dedicated high-priority axis-send that calls `TransmitClientEvent` with
+the flag). Re-measure with `DIY_AXIS_DEBUG` + watch the sim: the animation should
+track at frame rate. **No `A:` switch needed** — same `K:` event, plus the flag.
 
 ## 5. Phasing
-1. **Typed dispatch + `A:` axis default.** `write_var` prefix routing; controlled
-   axis writes its `A:` var; verify smooth with `DIY_AXIS_DEBUG`. *(Fixes the bug.)*
-2. **Per-axis binding config.** Expose `target`/`units`/`range` per axis; default
-   to the `A:` var; `K:` fallback for compatibility.
-3. **`B:` input-event transport.** Enumerate/hash/set (Plan 24), exposed through
-   the same typed dispatch; usable for axes and FFB-API writes.
-4. **Unify FFB-API + LVAR writes** (`L:FFB_*`, etc.) onto `write_var` so all MSFS
-   output goes through one typed path.
+1. **Priority-flag fix (the bug).** Transmit cyclic/collective `K:AXIS_*_SET`
+   with `GROUPID_IS_PRIORITY`+`HIGHEST`; verify smooth with `DIY_AXIS_DEBUG`.
+   Smallest possible change; unblocks the axis feel.
+2. **Typed dispatch.** `write_var(target, …)` routing `A:`/`L:`/`K:`/`B:` by
+   prefix; K: path carries the priority flag; existing A:/L:/K: reused.
+3. **`B:` input-event transport.** Enumerate/hash/set (Plan 24) — needed for
+   **pedals** (`B:PEDALS_PRESET`, per the H500C graph) and general use.
+4. **Per-axis output binding.** Config per axis (`target`/`units`/`range`),
+   defaulting to the H500C-proven targets (K:AXIS for cyclic/collective, B: for
+   pedals); `K:` `AXIS_*_SET` fallback preserves non-DIY behavior.
+5. **Unify FFB-API + LVAR writes** (`L:FFB_*`, etc.) onto `write_var`.
 
 ## 6. Risks / notes
-- **`A:`-var settability varies** — not every control var accepts
-  `SetDataOnSimObject`; use the ones SimHub has proven (§4 open item), not
-  guesses.
+- **Confirm pysimconnect's `send_event` flags** — the fix assumes it currently
+  sends `AXIS_*_SET` without `GROUPID_IS_PRIORITY`+`HIGHEST`. Verify on the sim
+  PC; if it already sets them, the cause is elsewhere and we re-measure.
 - **`B:` enumerate cost** — cache per aircraft; the reply can exceed 4 KB (Plan
   24 growable-buffer note).
 - **Don't regress non-DIY users** — `K:`/`AXIS_*_SET` stays the default when no
