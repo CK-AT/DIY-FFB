@@ -31,6 +31,10 @@ namespace DiyFfb.ProfileBrowser
         // Plan 17: when false, caller keeps the current vehicle's graph and
         // applies only the source profile's tuning. Set by "Use Tuning Only".
         public bool UseSourceGraph { get; private set; } = true;
+        // Plan 36: additional per-profile state to transport onto the active vehicle.
+        public bool UseFunctionTuning { get; private set; }
+        public bool UseSimVarBindings { get; private set; }
+        public bool UseActiveFunctions { get; private set; }
 
         // Data binding
         public ObservableCollection<ProfileBrowserEntry> Items { get; } = new ObservableCollection<ProfileBrowserEntry>();
@@ -542,6 +546,18 @@ namespace DiyFfb.ProfileBrowser
                 CheckCopyTuning.IsEnabled = entry.HasTuning;
                 CheckCopyTuning.IsChecked = entry.HasTuning;
 
+                // Plan 36: the extra transportable state. Each toggle is available only
+                // when the source carries that data; unchecked by default so a plain
+                // "apply" stays graph+tuning as before (opt-in for the rest).
+                CheckCopyFunctionTuning.IsEnabled = entry.HasFunctionTuning;
+                CheckCopyFunctionTuning.IsChecked = false;
+                CheckCopySimVarBindings.IsEnabled = entry.HasSimVarBindings;
+                CheckCopySimVarBindings.IsChecked = false;
+                CheckCopyActiveFunctions.IsEnabled = entry.HasActiveFunctions;
+                CheckCopyActiveFunctions.IsChecked = false;
+
+                UpdateGraphMismatchNote(entry);
+
                 PanelApplyActive.Visibility = Visibility.Visible;
                 TextApplyHint.Visibility = Visibility.Collapsed;
                 UpdateApplyEnabled();
@@ -558,7 +574,11 @@ namespace DiyFfb.ProfileBrowser
 
         private void UpdateApplyEnabled()
         {
-            bool anyToggle = CheckUseGraph.IsChecked == true || CheckCopyTuning.IsChecked == true;
+            bool anyToggle = CheckUseGraph.IsChecked == true
+                || CheckCopyTuning.IsChecked == true
+                || CheckCopyFunctionTuning.IsChecked == true
+                || CheckCopySimVarBindings.IsChecked == true
+                || CheckCopyActiveFunctions.IsChecked == true;
             bool sameVehicle = IsSourceSameAsDestination();
             TextApplyWarning.Visibility = sameVehicle ? Visibility.Visible : Visibility.Collapsed;
             ButtonApply.IsEnabled = anyToggle && !sameVehicle;
@@ -567,6 +587,68 @@ namespace DiyFfb.ProfileBrowser
         private void OnApplyToggleChanged(object sender, RoutedEventArgs e)
         {
             UpdateApplyEnabled();
+
+            // The mismatch note only matters for the graph-scoped copies (function /
+            // sim-var / active functions); refresh it as those toggles change.
+            var entry = ListItems.SelectedItems.Count == 1
+                ? ListItems.SelectedItems[0] as ProfileBrowserEntry
+                : null;
+            if (entry != null)
+                UpdateGraphMismatchNote(entry);
+        }
+
+        // Plan 36: cross-graph copies are inert-not-harmful (orphan function ids /
+        // aliases are ignored at scan time), but silently doing so is confusing. When a
+        // graph-scoped copy is selected and the source graph differs from the graph the
+        // destination will end up on, surface a non-blocking heads-up. Fail-open: if the
+        // graphs can't be resolved, show nothing rather than a false alarm.
+        private void UpdateGraphMismatchNote(ProfileBrowserEntry entry)
+        {
+            bool copiesGraphScoped = CheckCopyFunctionTuning.IsChecked == true
+                || CheckCopySimVarBindings.IsChecked == true
+                || CheckCopyActiveFunctions.IsChecked == true;
+            if (!copiesGraphScoped)
+            {
+                TextGraphMismatch.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            string sourceGraph = ResolveGraphForExistence(entry);
+
+            // The destination lands on the source's graph when "Use graph" is on;
+            // otherwise it keeps its own current graph.
+            string destGraph = null;
+            if (CheckUseGraph.IsChecked == true)
+            {
+                destGraph = sourceGraph;
+            }
+            else
+            {
+                var dest = CurrentDestination();
+                if (dest != null)
+                    destGraph = _plugin?.GetVehicleGraphPath(dest.GameId, dest.CarId);
+            }
+
+            string srcName = string.IsNullOrEmpty(sourceGraph) ? "" : Path.GetFileName(sourceGraph);
+            string dstName = string.IsNullOrEmpty(destGraph) ? "" : Path.GetFileName(destGraph);
+
+            // Can't determine either side → don't guess.
+            if (srcName.Length == 0 || dstName.Length == 0)
+            {
+                TextGraphMismatch.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            if (string.Equals(srcName, dstName, StringComparison.OrdinalIgnoreCase))
+            {
+                TextGraphMismatch.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            TextGraphMismatch.Text =
+                $"⚠ Source graph ({srcName}) differs from the destination graph ({dstName}). "
+                + "Copied function / binding / active-function settings apply only where the destination graph uses the same functions and aliases.";
+            TextGraphMismatch.Visibility = Visibility.Visible;
         }
 
         private void OnDestinationChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -656,7 +738,11 @@ namespace DiyFfb.ProfileBrowser
 
             bool useGraph = CheckUseGraph.IsChecked == true;
             bool useTuning = CheckCopyTuning.IsChecked == true;
-            if (!useGraph && !useTuning)
+            // Plan 36: extra opt-in copies (enabled only when the source has that data).
+            bool copyFunctionTuning = CheckCopyFunctionTuning.IsChecked == true;
+            bool copySimVarBindings = CheckCopySimVarBindings.IsChecked == true;
+            bool copyActiveFunctions = CheckCopyActiveFunctions.IsChecked == true;
+            if (!useGraph && !useTuning && !copyFunctionTuning && !copySimVarBindings && !copyActiveFunctions)
                 return;
 
             // Applying a stored profile onto its own vehicle is a no-op (also guards
@@ -672,7 +758,11 @@ namespace DiyFfb.ProfileBrowser
                 SelectedEntry = entry;
                 UseSourceGraph = useGraph;
                 UseTuning = useTuning;
-                UseGraphOnly = useGraph && !useTuning;
+                UseGraphOnly = useGraph && !useTuning
+                    && !copyFunctionTuning && !copySimVarBindings && !copyActiveFunctions;
+                UseFunctionTuning = copyFunctionTuning;
+                UseSimVarBindings = copySimVarBindings;
+                UseActiveFunctions = copyActiveFunctions;
                 DialogResult = true;
                 return;
             }
@@ -680,7 +770,8 @@ namespace DiyFfb.ProfileBrowser
             // Non-active destination: apply directly (persist only). Leave SelectedEntry
             // null so the caller does not also apply to the active vehicle.
             string graphPath = useGraph ? ResolveEntryGraphPath(entry) : null;
-            _plugin?.ApplyProfileToVehicle(dest.GameId, dest.CarId, graphPath, entry.Profile, useTuning);
+            _plugin?.ApplyProfileToVehicle(dest.GameId, dest.CarId, graphPath, entry.Profile, useTuning,
+                copyFunctionTuning, copySimVarBindings, copyActiveFunctions);
             ThemedMessageBox.Show(this,
                 $"Applied to '{dest.Label}'.\n\nIt takes effect when that vehicle is next active.",
                 "Applied", MessageBoxButton.OK, MessageBoxImage.Information);

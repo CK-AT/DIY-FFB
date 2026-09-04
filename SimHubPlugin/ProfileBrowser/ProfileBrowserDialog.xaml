@@ -146,13 +146,41 @@
                                       Checked="OnApplyToggleChanged"
                                       Unchecked="OnApplyToggleChanged"/>
                             <CheckBox x:Name="CheckCopyTuning"
-                                      Content="Copy tuning"
+                                      Content="Copy graph tuning"
                                       Foreground="#DDDDDD"
                                       VerticalContentAlignment="Center"
                                       Margin="18,0,0,0"
                                       Checked="OnApplyToggleChanged"
                                       Unchecked="OnApplyToggleChanged"/>
                         </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <CheckBox x:Name="CheckCopyFunctionTuning"
+                                      Content="Copy function tuning"
+                                      Foreground="#DDDDDD"
+                                      VerticalContentAlignment="Center"
+                                      Checked="OnApplyToggleChanged"
+                                      Unchecked="OnApplyToggleChanged"/>
+                            <CheckBox x:Name="CheckCopySimVarBindings"
+                                      Content="Copy sim-var bindings"
+                                      Foreground="#DDDDDD"
+                                      VerticalContentAlignment="Center"
+                                      Margin="18,0,0,0"
+                                      Checked="OnApplyToggleChanged"
+                                      Unchecked="OnApplyToggleChanged"/>
+                            <CheckBox x:Name="CheckCopyActiveFunctions"
+                                      Content="Copy active functions"
+                                      Foreground="#DDDDDD"
+                                      VerticalContentAlignment="Center"
+                                      Margin="18,0,0,0"
+                                      Checked="OnApplyToggleChanged"
+                                      Unchecked="OnApplyToggleChanged"/>
+                        </StackPanel>
+                        <TextBlock x:Name="TextGraphMismatch"
+                                   FontSize="10"
+                                   Foreground="#E0A020"
+                                   TextWrapping="Wrap"
+                                   Visibility="Collapsed"
+                                   Margin="0,4,0,0"/>
                         <TextBlock x:Name="TextApplyWarning"
                                    Text="Source and destination are the same vehicle — nothing to apply."
                                    FontSize="10"

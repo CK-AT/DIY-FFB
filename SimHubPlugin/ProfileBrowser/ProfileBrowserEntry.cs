@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using DiyFfb.GraphEditor;
 
 namespace DiyFfb.ProfileBrowser
@@ -44,6 +45,20 @@ namespace DiyFfb.ProfileBrowser
         // Tuning info (for stored profiles)
         public bool HasTuning { get; set; }
         public int TunedParamCount { get; set; }
+
+        // Plan 36: additional transportable state beyond graph tuning. Computed from
+        // the profile so the apply card can enable a copy toggle only when the source
+        // actually carries that data (mirrors the HasTuning gate for graph params).
+        public bool HasFunctionTuning =>
+            Profile?.FunctionOverrides != null &&
+            Profile.FunctionOverrides.Any(kvp => kvp.Value != null && !kvp.Value.IsEmpty);
+
+        public bool HasSimVarBindings =>
+            (Profile?.MsfsReadVarOverrides?.Any(kvp => kvp.Value != null && !kvp.Value.IsEmpty) ?? false) ||
+            (Profile?.MsfsWriteVarOverrides?.Any(kvp => kvp.Value != null && !kvp.Value.IsEmpty) ?? false);
+
+        public bool HasActiveFunctions =>
+            Profile?.ActiveFunctionIds != null && Profile.ActiveFunctionIds.Count > 0;
 
         // Profile data (for stored profiles and imports)
         public DiyFfbPluginSettings.AircraftFfbProfile Profile { get; set; }

@@ -3528,6 +3528,23 @@ namespace DiyFfb
                    AreMsfsOverridesEqual(left.MsfsWriteVarOverrides, right.MsfsWriteVarOverrides);
         }
 
+        // Plan 36: deep-clone the per-function override dict for a cross-profile copy.
+        // FunctionConfigOverrides has nested objects/arrays and no Clone(), so round-trip
+        // through JSON; skip null/empty entries so the destination stays clean.
+        private static Dictionary<int, FunctionConfigOverrides> CloneFunctionOverrides(
+            Dictionary<int, FunctionConfigOverrides> src)
+        {
+            var copy = new Dictionary<int, FunctionConfigOverrides>();
+            if (src == null) return copy;
+            foreach (var kvp in src)
+            {
+                if (kvp.Value == null || kvp.Value.IsEmpty) continue;
+                string json = Newtonsoft.Json.JsonConvert.SerializeObject(kvp.Value);
+                copy[kvp.Key] = Newtonsoft.Json.JsonConvert.DeserializeObject<FunctionConfigOverrides>(json);
+            }
+            return copy;
+        }
+
         // Plan 34: deep-clone a per-alias override dict (never null; overrides are
         // mutated in place, so the profile snapshot must own its own copies).
         private static Dictionary<string, MsfsVarBindingOverride> CloneMsfsOverrides(
@@ -3759,9 +3776,11 @@ namespace DiyFfb
         /// Applies a profile selected from the Profile Manager to the current vehicle.
         /// Thin wrapper over <see cref="ApplyProfileToVehicle"/> for the active vehicle.
         /// </summary>
-        public void ApplyProfileFromBrowser(string graphPath, DiyFfbPluginSettings.AircraftFfbProfile profile, bool useTuning)
+        public void ApplyProfileFromBrowser(string graphPath, DiyFfbPluginSettings.AircraftFfbProfile profile, bool useTuning,
+            bool copyFunctionTuning = false, bool copySimVarBindings = false, bool copyActiveFunctions = false)
         {
-            ApplyProfileToVehicle(activeGameId, activeCarId, graphPath, profile, useTuning);
+            ApplyProfileToVehicle(activeGameId, activeCarId, graphPath, profile, useTuning,
+                copyFunctionTuning, copySimVarBindings, copyActiveFunctions);
         }
 
         /// <summary>
@@ -3774,8 +3793,12 @@ namespace DiyFfb
         /// <param name="graphPath">Graph path to assign, or null/empty to keep the destination's current graph (tuning-only).</param>
         /// <param name="sourceProfile">Profile to copy tuning from (null for templates / graph-only).</param>
         /// <param name="useTuning">If true, copies GraphParamValues (+ rotor index) from the source profile.</param>
+        /// <param name="copyFunctionTuning">Plan 36: if true, copies per-function config overrides.</param>
+        /// <param name="copySimVarBindings">Plan 36: if true, copies MSFS read/write var binding overrides.</param>
+        /// <param name="copyActiveFunctions">Plan 36: if true, copies the active/used function set.</param>
         public void ApplyProfileToVehicle(string gameId, string carId, string graphPath,
-            DiyFfbPluginSettings.AircraftFfbProfile sourceProfile, bool useTuning)
+            DiyFfbPluginSettings.AircraftFfbProfile sourceProfile, bool useTuning,
+            bool copyFunctionTuning = false, bool copySimVarBindings = false, bool copyActiveFunctions = false)
         {
             if (Settings == null || string.IsNullOrWhiteSpace(carId))
                 return;
@@ -3810,6 +3833,22 @@ namespace DiyFfb
                 destProfile.XPlaneRotorIndex = sourceProfile.XPlaneRotorIndex;
             }
 
+            // Plan 36: transport the remaining per-profile state, each independently
+            // gated. Overrides the destination wholesale (an override is atomic); any
+            // function id / MSFS alias the destination graph does not use is inert at
+            // scan time (like orphan GraphParamValues), so cross-graph copies are safe.
+            if (copyFunctionTuning)
+                destProfile.FunctionOverrides = CloneFunctionOverrides(sourceProfile?.FunctionOverrides);
+
+            if (copySimVarBindings)
+            {
+                destProfile.MsfsReadVarOverrides = CloneMsfsOverrides(sourceProfile?.MsfsReadVarOverrides);
+                destProfile.MsfsWriteVarOverrides = CloneMsfsOverrides(sourceProfile?.MsfsWriteVarOverrides);
+            }
+
+            if (copyActiveFunctions && sourceProfile?.ActiveFunctionIds != null)
+                destProfile.ActiveFunctionIds = new HashSet<int>(sourceProfile.ActiveFunctionIds);
+
             // 3. Active target: reload the runtime graph now; non-active: persist only.
             if (isActive)
             {
@@ -3818,6 +3857,20 @@ namespace DiyFfb
                 ResolveActiveGraph(activeGameId, activeCarId);
                 BuildGraphParams();
                 ActiveGraphChanged?.Invoke(this, EventArgs.Empty);
+
+                // Re-apply the copied config to the running graph. ApplyProfileFunctionOverrides
+                // reads FunctionOverrides (null-derefs otherwise) and ActiveFunctionIds off the
+                // profile, so ensure the dict exists before invoking.
+                if (copyFunctionTuning || copyActiveFunctions)
+                {
+                    if (destProfile.FunctionOverrides == null)
+                        destProfile.FunctionOverrides = new Dictionary<int, FunctionConfigOverrides>();
+                    _configOrchestrator.ApplyProfileFunctionOverrides(destProfile);
+                }
+
+                if (copySimVarBindings)
+                    ApplyMsfsVarOverrides();
+
                 ui?.Dispatcher?.BeginInvoke(new Action(() =>
                 {
                     ui.RefreshGraphSelection();

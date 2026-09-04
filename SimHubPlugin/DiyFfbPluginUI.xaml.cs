@@ -913,7 +913,8 @@ namespace DiyFfb
                         graphPath = null;
                     }
 
-                    Plugin.ApplyProfileFromBrowser(graphPath, entry.Profile, dialog.UseTuning);
+                    Plugin.ApplyProfileFromBrowser(graphPath, entry.Profile, dialog.UseTuning,
+                        dialog.UseFunctionTuning, dialog.UseSimVarBindings, dialog.UseActiveFunctions);
                     RefreshGraphSelection();
                 }
             }
