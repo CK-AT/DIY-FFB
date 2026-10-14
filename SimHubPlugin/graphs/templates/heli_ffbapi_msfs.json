@@ -1,0 +1,3663 @@
+{
+  "Version": 4,
+  "Nodes": [
+    {
+      "Id": "in_torque",
+      "Kind": "Input",
+      "X": 1020.0,
+      "Y": 40.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "MainRotor.Speed"
+        }
+      ],
+      "SignalGroup": "MSFS"
+    },
+    {
+      "Id": "in_derivations_raw",
+      "Kind": "Input",
+      "X": 50.0,
+      "Y": 50.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "Speed.TAS"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "MainRotor.Speed"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "Angle.Beta"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "VVI.World"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "Eng.TorquePct"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "G_Nrml"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "Collective.Position"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "TailRotor.BladePitchPct"
+        }
+      ],
+      "SignalGroup": "MSFS"
+    },
+    {
+      "Id": "derivations_include",
+      "Title": "MSFS Derivations",
+      "Kind": "Include",
+      "X": 310.0,
+      "Y": 50.0,
+      "IncludePath": "..\\_embedded\\msfs_derivations.json",
+      "InputPortOrder": [
+        "tas_kts",
+        "main_rotor_rpm",
+        "beta_deg",
+        "vvi_fps",
+        "eng_torque_pct",
+        "g_force",
+        "collective_pos_pct",
+        "tr_pitch_pct",
+        "rot_sign"
+      ]
+    },
+    {
+      "Id": "cyclic_pitch_include",
+      "Title": "Cyclic Pitch",
+      "Kind": "Include",
+      "X": 660.0,
+      "Y": 1800.0,
+      "IncludePath": "..\\_embedded\\heli_cyclic_ffbapi.json",
+      "FunctionScope": "FlightStickPitch",
+      "InputPortOrder": [
+        "blade_alph",
+        "rpm_norm",
+        "owl",
+        "hat_pos",
+        "hat_neg",
+        "ftr_button",
+        "axis_position",
+        "axis_center",
+        "axis_force",
+        "etl_bump",
+        "vrs",
+        "rbs",
+        "g_load",
+        "gnd_buffet",
+        "turb",
+        "on_ground",
+        "etl_load_gain_eff",
+        "rbs_load_gain_eff",
+        "g_load_gain_eff",
+        "api_trim",
+        "api_tr_on",
+        "api_has_trim",
+        "hyd_loss"
+      ]
+    },
+    {
+      "Id": "cyclic_roll_include",
+      "Title": "Cyclic Roll",
+      "Kind": "Include",
+      "X": 670.0,
+      "Y": 2770.0,
+      "IncludePath": "..\\_embedded\\heli_cyclic_ffbapi.json",
+      "FunctionScope": "FlightStickRoll",
+      "InputPortOrder": [
+        "blade_alph",
+        "rpm_norm",
+        "owl",
+        "hat_pos",
+        "hat_neg",
+        "ftr_button",
+        "axis_position",
+        "axis_center",
+        "axis_force",
+        "etl_bump",
+        "vrs",
+        "rbs",
+        "g_load",
+        "gnd_buffet",
+        "turb",
+        "on_ground",
+        "etl_load_gain_eff",
+        "rbs_load_gain_eff",
+        "g_load_gain_eff",
+        "api_trim",
+        "api_tr_on",
+        "api_has_trim",
+        "hyd_loss"
+      ]
+    },
+    {
+      "Id": "collective_include",
+      "Title": "Collective",
+      "Kind": "Include",
+      "X": 590.0,
+      "Y": 1310.0,
+      "IncludePath": "..\\_embedded\\heli_collective_ffbapi.json",
+      "FunctionScope": "FlightStickCollective",
+      "InputPortOrder": [
+        "axis_position",
+        "axis_center",
+        "axis_force",
+        "torque_norm",
+        "vrs",
+        "rpm_norm",
+        "gnd_buffet",
+        "turb",
+        "api_trim",
+        "api_tr_on",
+        "api_has_trim",
+        "hyd_loss"
+      ]
+    },
+    {
+      "Id": "pedals_include",
+      "Title": "Pedals",
+      "Kind": "Include",
+      "X": 530.0,
+      "Y": 710.0,
+      "IncludePath": "..\\_embedded\\heli_pedals_ffbapi.json",
+      "FunctionScope": "FlightPedals",
+      "InputPortOrder": [
+        "axis_pos",
+        "axis_center",
+        "axis_force_left",
+        "axis_force_right",
+        "rpm_norm",
+        "rot_sign",
+        "tr_inflow",
+        "buffet_gate",
+        "turb",
+        "api_trim",
+        "api_tr_on",
+        "api_has_trim",
+        "hyd_loss"
+      ]
+    },
+    {
+      "Id": "in_axis_pitch",
+      "Kind": "Input",
+      "X": 110.0,
+      "Y": 1870.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlightStickPitch.Position"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlightStickPitch.Center"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlightStickPitch.Force"
+        }
+      ],
+      "SignalGroup": "Axis"
+    },
+    {
+      "Id": "in_axis_roll",
+      "Kind": "Input",
+      "X": 240.0,
+      "Y": 2740.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlightStickRoll.Position"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlightStickRoll.Center"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlightStickRoll.Force"
+        }
+      ],
+      "SignalGroup": "Axis"
+    },
+    {
+      "Id": "param_owl",
+      "Kind": "Param",
+      "X": 320.0,
+      "Y": 1830.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "OWL"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "const_owl_off",
+      "Title": "0",
+      "Kind": "Const",
+      "X": 460.0,
+      "Y": 2720.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 0.0
+    },
+    {
+      "Id": "param_blade_count",
+      "Kind": "Param",
+      "X": 40.0,
+      "Y": 450.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "BladeCount"
+        }
+      ],
+      "SignalGroup": "Aircraft"
+    },
+    {
+      "Id": "param_rotation_sign",
+      "Kind": "Param",
+      "X": 40.0,
+      "Y": 530.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "RotationSign"
+        }
+      ],
+      "SignalGroup": "Aircraft"
+    },
+    {
+      "Id": "param_tr_blade_count",
+      "Kind": "Param",
+      "X": 1000.0,
+      "Y": 780.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "TRBladeCount"
+        }
+      ],
+      "SignalGroup": "Aircraft"
+    },
+    {
+      "Id": "param_tr_gear_ratio",
+      "Kind": "Param",
+      "X": 1010.0,
+      "Y": 850.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "TRGearRatio"
+        }
+      ],
+      "SignalGroup": "Aircraft"
+    },
+    {
+      "Id": "const_phase_zero",
+      "Title": "0 deg",
+      "Kind": "Const",
+      "X": 1180.0,
+      "Y": 2270.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 0.0
+    },
+    {
+      "Id": "const_phase_90",
+      "Title": "90 deg",
+      "Kind": "Const",
+      "X": 1060.0,
+      "Y": 3210.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 90.0
+    },
+    {
+      "Id": "mul_phase_roll",
+      "Title": "Roll Phase",
+      "Kind": "Op",
+      "X": 1200.0,
+      "Y": 3180.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "param_etl_bump_load_pitch",
+      "Kind": "Param",
+      "X": 210.0,
+      "Y": 2170.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "EtlBumpLoadGain"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "param_etl_bump_load_roll",
+      "Kind": "Param",
+      "X": 40.0,
+      "Y": 3090.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "EtlBumpLoadRollGain"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "mul_etl_roll_eff",
+      "Title": "Roll ETL Load (×rot sign)",
+      "Kind": "Op",
+      "X": 370.0,
+      "Y": 3090.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "param_rbs_load_pitch",
+      "Kind": "Param",
+      "X": 210.0,
+      "Y": 2240.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "RbsLoadPitchGain"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "param_rbs_load_roll",
+      "Kind": "Param",
+      "X": 60.0,
+      "Y": 3190.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "RbsLoadRollGain"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "mul_rbs_roll_eff",
+      "Title": "Roll RBS Load (×rot sign)",
+      "Kind": "Op",
+      "X": 370.0,
+      "Y": 3190.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "vib_pitch_include",
+      "Title": "Vib Pitch",
+      "Kind": "Include",
+      "X": 1360.0,
+      "Y": 1990.0,
+      "IncludePath": "..\\_embedded\\heli_vibration_cyclic.json",
+      "FunctionScope": "FlightStickPitch",
+      "InputPortOrder": [
+        "blade_alph",
+        "vrs",
+        "slap_rat",
+        "rpm_norm",
+        "blade_count",
+        "etl_bump",
+        "rbs",
+        "mu_buzz",
+        "gnd_boost",
+        "phase"
+      ]
+    },
+    {
+      "Id": "vib_roll_include",
+      "Title": "Vib Roll",
+      "Kind": "Include",
+      "X": 1330.0,
+      "Y": 2890.0,
+      "IncludePath": "..\\_embedded\\heli_vibration_cyclic.json",
+      "FunctionScope": "FlightStickRoll",
+      "InputPortOrder": [
+        "blade_alph",
+        "vrs",
+        "slap_rat",
+        "rpm_norm",
+        "blade_count",
+        "etl_bump",
+        "rbs",
+        "mu_buzz",
+        "gnd_boost",
+        "phase"
+      ]
+    },
+    {
+      "Id": "vib_pedal_include",
+      "Title": "Vib Pedals",
+      "Kind": "Include",
+      "X": 1350.0,
+      "Y": 730.0,
+      "IncludePath": "..\\_embedded\\heli_vibration_pedal.json",
+      "FunctionScope": "FlightPedals",
+      "InputPortOrder": [
+        "rpm_norm",
+        "blade_count",
+        "gnd_boost",
+        "tr_blade_count",
+        "tr_gear"
+      ]
+    },
+    {
+      "Id": "vib_collective_include",
+      "Title": "Vib Collective",
+      "Kind": "Include",
+      "X": 1280.0,
+      "Y": 1370.0,
+      "IncludePath": "..\\_embedded\\heli_vibration_collective.json",
+      "FunctionScope": "FlightStickCollective"
+    },
+    {
+      "Id": "540bd050ff4944be849a35b8fa047f7d",
+      "Kind": "Output",
+      "X": 1350.0,
+      "Y": 90.0,
+      "Ports": [
+        {
+          "Kind": "Input",
+          "SignalSuffix": "Vib1Fund"
+        }
+      ],
+      "SignalGroup": "Shared"
+    },
+    {
+      "Id": "96841bc9a8204e6285da2eb18b924e0c",
+      "Title": "Calc Fundamental",
+      "Kind": "Op",
+      "X": 1170.0,
+      "Y": 90.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a/b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "div"
+    },
+    {
+      "Id": "5a3cec22fab74cc09233193cba8135cd",
+      "Title": "1/min -> 1/s",
+      "Kind": "Const",
+      "X": 1040.0,
+      "Y": 120.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 60.0
+    },
+    {
+      "Id": "param_g_load_gain",
+      "Kind": "Param",
+      "X": 240.0,
+      "Y": 2310.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "GLoadGain"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "param_g_load_roll_gain",
+      "Kind": "Param",
+      "X": 60.0,
+      "Y": 3290.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "GLoadRollGain"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "mul_g_roll_eff",
+      "Title": "Roll G gain x mu x rot sign",
+      "Kind": "Op",
+      "X": 370.0,
+      "Y": 3290.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "c",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b*c",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "in_on_ground",
+      "Kind": "Input",
+      "X": 990.0,
+      "Y": 310.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "OnGround"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "GroundSpeed"
+        }
+      ],
+      "SignalGroup": "MSFS"
+    },
+    {
+      "Id": "gnd_cues_include",
+      "Title": "Ground Cues",
+      "Kind": "Include",
+      "X": 1170.0,
+      "Y": 310.0,
+      "IncludePath": "..\\_embedded\\heli_ground_cues.json",
+      "InputPortOrder": [
+        "on_ground",
+        "ground_speed",
+        "descent_fpm"
+      ]
+    },
+    {
+      "Id": "bus_send_rotor",
+      "Title": "Rotor Bus Send",
+      "Kind": "LocalSend",
+      "X": 600.0,
+      "Y": 50.0,
+      "Ports": [
+        {
+          "Name": "ETLBump",
+          "Kind": "Input",
+          "BusName": "ETLBump"
+        },
+        {
+          "Name": "RBS",
+          "Kind": "Input",
+          "BusName": "RBS"
+        },
+        {
+          "Name": "BladeAlphaPitch",
+          "Kind": "Input",
+          "BusName": "BladeAlphaPitch"
+        },
+        {
+          "Name": "BladeAlphaRoll",
+          "Kind": "Input",
+          "BusName": "BladeAlphaRoll"
+        },
+        {
+          "Name": "VRS",
+          "Kind": "Input",
+          "BusName": "VRS"
+        },
+        {
+          "Name": "Slap",
+          "Kind": "Input",
+          "BusName": "Slap"
+        },
+        {
+          "Name": "TRQnorm",
+          "Kind": "Input",
+          "BusName": "TRQnorm"
+        },
+        {
+          "Name": "GLoad",
+          "Kind": "Input",
+          "BusName": "GLoad"
+        },
+        {
+          "Name": "Mu",
+          "Kind": "Input",
+          "BusName": "Mu"
+        },
+        {
+          "Name": "TrInflow",
+          "Kind": "Input",
+          "BusName": "TrInflow"
+        },
+        {
+          "Name": "Turb",
+          "Kind": "Input",
+          "BusName": "Turb"
+        },
+        {
+          "Name": "RPMnorm",
+          "Kind": "Input",
+          "BusName": "RPMnorm"
+        },
+        {
+          "Name": "MuBuzz",
+          "Kind": "Input",
+          "BusName": "MuBuzz"
+        },
+        {
+          "Name": "TrBuffetGate",
+          "Kind": "Input",
+          "BusName": "TrBuffetGate"
+        },
+        {
+          "Name": "Descent",
+          "Kind": "Input",
+          "BusName": "Descent"
+        }
+      ]
+    },
+    {
+      "Id": "bus_send_params",
+      "Title": "Params Bus Send",
+      "Kind": "LocalSend",
+      "X": 340.0,
+      "Y": 480.0,
+      "Ports": [
+        {
+          "Name": "BladeCount",
+          "Kind": "Input",
+          "BusName": "BladeCount"
+        },
+        {
+          "Name": "RotationSign",
+          "Kind": "Input",
+          "BusName": "RotationSign"
+        }
+      ]
+    },
+    {
+      "Id": "bus_send_ground",
+      "Title": "Ground Bus Send",
+      "Kind": "LocalSend",
+      "X": 1390.0,
+      "Y": 310.0,
+      "Ports": [
+        {
+          "Name": "GndBoost",
+          "Kind": "Input",
+          "BusName": "GndBoost"
+        },
+        {
+          "Name": "GndBuffet",
+          "Kind": "Input",
+          "BusName": "GndBuffet"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_derivations",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 80.0,
+      "Y": 300.0,
+      "Ports": [
+        {
+          "Name": "RotationSign",
+          "Kind": "Output",
+          "BusName": "RotationSign"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_vib_pitch",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 1150.0,
+      "Y": 1990.0,
+      "Ports": [
+        {
+          "Name": "BladeAlphaPitch",
+          "Kind": "Output",
+          "BusName": "BladeAlphaPitch"
+        },
+        {
+          "Name": "VRS",
+          "Kind": "Output",
+          "BusName": "VRS"
+        },
+        {
+          "Name": "Slap",
+          "Kind": "Output",
+          "BusName": "Slap"
+        },
+        {
+          "Name": "RPMnorm",
+          "Kind": "Output",
+          "BusName": "RPMnorm"
+        },
+        {
+          "Name": "BladeCount",
+          "Kind": "Output",
+          "BusName": "BladeCount"
+        },
+        {
+          "Name": "ETLBump",
+          "Kind": "Output",
+          "BusName": "ETLBump"
+        },
+        {
+          "Name": "RBS",
+          "Kind": "Output",
+          "BusName": "RBS"
+        },
+        {
+          "Name": "MuBuzz",
+          "Kind": "Output",
+          "BusName": "MuBuzz"
+        },
+        {
+          "Name": "GndBoost",
+          "Kind": "Output",
+          "BusName": "GndBoost"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_vib_roll",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 1040.0,
+      "Y": 2890.0,
+      "Ports": [
+        {
+          "Name": "BladeAlphaRoll",
+          "Kind": "Output",
+          "BusName": "BladeAlphaRoll"
+        },
+        {
+          "Name": "VRS",
+          "Kind": "Output",
+          "BusName": "VRS"
+        },
+        {
+          "Name": "Slap",
+          "Kind": "Output",
+          "BusName": "Slap"
+        },
+        {
+          "Name": "RPMnorm",
+          "Kind": "Output",
+          "BusName": "RPMnorm"
+        },
+        {
+          "Name": "BladeCount",
+          "Kind": "Output",
+          "BusName": "BladeCount"
+        },
+        {
+          "Name": "ETLBump",
+          "Kind": "Output",
+          "BusName": "ETLBump"
+        },
+        {
+          "Name": "RBS",
+          "Kind": "Output",
+          "BusName": "RBS"
+        },
+        {
+          "Name": "MuBuzz",
+          "Kind": "Output",
+          "BusName": "MuBuzz"
+        },
+        {
+          "Name": "GndBoost",
+          "Kind": "Output",
+          "BusName": "GndBoost"
+        },
+        {
+          "Name": "RotationSign",
+          "Kind": "Output",
+          "BusName": "RotationSign"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_roll_glue",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 180.0,
+      "Y": 3390.0,
+      "Ports": [
+        {
+          "Name": "RotationSign",
+          "Kind": "Output",
+          "BusName": "RotationSign"
+        },
+        {
+          "Name": "Mu",
+          "Kind": "Output",
+          "BusName": "Mu"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_collective",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 330.0,
+      "Y": 1340.0,
+      "Ports": [
+        {
+          "Name": "TRQnorm",
+          "Kind": "Output",
+          "BusName": "TRQnorm"
+        },
+        {
+          "Name": "VRS",
+          "Kind": "Output",
+          "BusName": "VRS"
+        },
+        {
+          "Name": "RPMnorm",
+          "Kind": "Output",
+          "BusName": "RPMnorm"
+        },
+        {
+          "Name": "GndBuffet",
+          "Kind": "Output",
+          "BusName": "GndBuffet"
+        },
+        {
+          "Name": "Turb",
+          "Kind": "Output",
+          "BusName": "Turb"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_vib_collective",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 1110.0,
+      "Y": 1370.0,
+      "Ports": [
+        {
+          "Name": "RPMnorm",
+          "Kind": "Output",
+          "BusName": "RPMnorm"
+        },
+        {
+          "Name": "BladeCount",
+          "Kind": "Output",
+          "BusName": "BladeCount"
+        },
+        {
+          "Name": "VRS",
+          "Kind": "Output",
+          "BusName": "VRS"
+        },
+        {
+          "Name": "Slap",
+          "Kind": "Output",
+          "BusName": "Slap"
+        },
+        {
+          "Name": "ETLBump",
+          "Kind": "Output",
+          "BusName": "ETLBump"
+        },
+        {
+          "Name": "RBS",
+          "Kind": "Output",
+          "BusName": "RBS"
+        },
+        {
+          "Name": "GndBoost",
+          "Kind": "Output",
+          "BusName": "GndBoost"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_pedals",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 320.0,
+      "Y": 840.0,
+      "Ports": [
+        {
+          "Name": "RPMnorm",
+          "Kind": "Output",
+          "BusName": "RPMnorm"
+        },
+        {
+          "Name": "RotationSign",
+          "Kind": "Output",
+          "BusName": "RotationSign"
+        },
+        {
+          "Name": "TrInflow",
+          "Kind": "Output",
+          "BusName": "TrInflow"
+        },
+        {
+          "Name": "TrBuffetGate",
+          "Kind": "Output",
+          "BusName": "TrBuffetGate"
+        },
+        {
+          "Name": "Turb",
+          "Kind": "Output",
+          "BusName": "Turb"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_vib_pedal",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 1120.0,
+      "Y": 660.0,
+      "Ports": [
+        {
+          "Name": "RPMnorm",
+          "Kind": "Output",
+          "BusName": "RPMnorm"
+        },
+        {
+          "Name": "BladeCount",
+          "Kind": "Output",
+          "BusName": "BladeCount"
+        },
+        {
+          "Name": "GndBoost",
+          "Kind": "Output",
+          "BusName": "GndBoost"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_cyclic_pitch_pre",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 360.0,
+      "Y": 1740.0,
+      "Ports": [
+        {
+          "Name": "BladeAlphaPitch",
+          "Kind": "Output",
+          "BusName": "BladeAlphaPitch"
+        },
+        {
+          "Name": "RPMnorm",
+          "Kind": "Output",
+          "BusName": "RPMnorm"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_cyclic_pitch_cues",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 350.0,
+      "Y": 1950.0,
+      "Ports": [
+        {
+          "Name": "ETLBump",
+          "Kind": "Output",
+          "BusName": "ETLBump"
+        },
+        {
+          "Name": "VRS",
+          "Kind": "Output",
+          "BusName": "VRS"
+        },
+        {
+          "Name": "RBS",
+          "Kind": "Output",
+          "BusName": "RBS"
+        },
+        {
+          "Name": "GLoad",
+          "Kind": "Output",
+          "BusName": "GLoad"
+        },
+        {
+          "Name": "GndBuffet",
+          "Kind": "Output",
+          "BusName": "GndBuffet"
+        },
+        {
+          "Name": "Turb",
+          "Kind": "Output",
+          "BusName": "Turb"
+        },
+        {
+          "Name": "out_6",
+          "Kind": "Output",
+          "BusName": "OnGround"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_cyclic_roll_pre",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 440.0,
+      "Y": 2620.0,
+      "Ports": [
+        {
+          "Name": "BladeAlphaRoll",
+          "Kind": "Output",
+          "BusName": "BladeAlphaRoll"
+        },
+        {
+          "Name": "RPMnorm",
+          "Kind": "Output",
+          "BusName": "RPMnorm"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_cyclic_roll_cues",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 290.0,
+      "Y": 2860.0,
+      "Ports": [
+        {
+          "Name": "ETLBump",
+          "Kind": "Output",
+          "BusName": "ETLBump"
+        },
+        {
+          "Name": "VRS",
+          "Kind": "Output",
+          "BusName": "VRS"
+        },
+        {
+          "Name": "RBS",
+          "Kind": "Output",
+          "BusName": "RBS"
+        },
+        {
+          "Name": "GLoad",
+          "Kind": "Output",
+          "BusName": "GLoad"
+        },
+        {
+          "Name": "GndBuffet",
+          "Kind": "Output",
+          "BusName": "GndBuffet"
+        },
+        {
+          "Name": "Turb",
+          "Kind": "Output",
+          "BusName": "Turb"
+        },
+        {
+          "Name": "out_6",
+          "Kind": "Output",
+          "BusName": "OnGround"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_ground",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 1000.0,
+      "Y": 410.0,
+      "Ports": [
+        {
+          "Name": "Descent",
+          "Kind": "Output",
+          "BusName": "Descent"
+        }
+      ]
+    },
+    {
+      "Id": "dae6ad6a85514644bf1a9186089cfd1f",
+      "Kind": "Input",
+      "X": 270.0,
+      "Y": 1210.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlightStickCollective.Position"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlightStickCollective.Center"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlightStickCollective.Force"
+        }
+      ],
+      "SignalGroup": "Axis"
+    },
+    {
+      "Id": "44bc055423da4d53a9565d5d2586f541",
+      "Title": "MSFS Vars Out",
+      "Kind": "MsfsVarOut",
+      "X": 820.0,
+      "Y": 1290.0,
+      "Ports": [
+        {
+          "Name": "MSFS.Out.Collective",
+          "Kind": "Input",
+          "SimVar": "K:AXIS_COLLECTIVE_SET",
+          "Unit": "number",
+          "OutMin": -16383.0,
+          "OutMax": 16383.0
+        }
+      ]
+    },
+    {
+      "Id": "54214133525e48dc849872e63f121fba",
+      "Title": "MSFS Vars Out",
+      "Kind": "MsfsVarOut",
+      "X": 940.0,
+      "Y": 1760.0,
+      "Ports": [
+        {
+          "Name": "MSFS.Out.Pitch",
+          "Kind": "Input",
+          "SimVar": "K:AXIS_CYCLIC_LONGITUDINAL_SET",
+          "Unit": "number",
+          "InMin": 1.0,
+          "InMax": -1.0,
+          "OutMin": -16383.0,
+          "OutMax": 16383.0
+        }
+      ]
+    },
+    {
+      "Id": "163d4878dd0b455dbfed260905b4c1ef",
+      "Title": "MSFS Vars Out",
+      "Kind": "MsfsVarOut",
+      "X": 1070.0,
+      "Y": 2680.0,
+      "Ports": [
+        {
+          "Name": "MSFS.Out.Roll",
+          "Kind": "Input",
+          "SimVar": "K:AXIS_CYCLIC_LATERAL_SET",
+          "Unit": "number",
+          "InMin": 1.0,
+          "InMax": -1.0,
+          "OutMin": -16383.0,
+          "OutMax": 16383.0
+        }
+      ]
+    },
+    {
+      "Id": "5a1f8f7a87fb4588a66ea1759c4c2fc4",
+      "Kind": "Input",
+      "X": 310.0,
+      "Y": 690.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlightPedals.Position"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlightPedals.Center"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlightPedals.Left.Force"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlightPedals.Right.Force"
+        }
+      ],
+      "SignalGroup": "Axis"
+    },
+    {
+      "Id": "4ccf8ad7e2b14d8db76d8e16a9b13255",
+      "Title": "MSFS Vars Out",
+      "Kind": "MsfsVarOut",
+      "X": 730.0,
+      "Y": 670.0,
+      "Ports": [
+        {
+          "Name": "MSFS.Out.Pedals",
+          "Kind": "Input",
+          "SimVar": "B:PEDALS_PRESET",
+          "Unit": "number",
+          "InMin": 1.0,
+          "InMax": -1.0,
+          "OutMin": -16383.0,
+          "OutMax": 16383.0
+        }
+      ]
+    },
+    {
+      "Id": "e634c30cac56429eb13d18c89f255ff5",
+      "Title": "Local Send",
+      "Kind": "LocalSend",
+      "X": 1180.0,
+      "Y": 220.0,
+      "Ports": [
+        {
+          "Name": "in_0",
+          "Kind": "Input",
+          "BusName": "OnGround"
+        }
+      ]
+    },
+    {
+      "Id": "msfs_ffbapi_discovery",
+      "Title": "",
+      "Kind": "MsfsVarDef",
+      "X": 50.0,
+      "Y": 3680.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "MSFS.In.FfbApiVersion",
+          "SimVar": "L:FFB_API_VERSION",
+          "Unit": "number"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "MSFS.In.FfbFeatures",
+          "SimVar": "L:FFB_FEATURES",
+          "Unit": "number"
+        }
+      ],
+      "SignalGroup": "MSFS"
+    },
+    {
+      "Id": "msfs_ffbapi_trim",
+      "Title": "",
+      "Kind": "MsfsVarDef",
+      "X": 50.0,
+      "Y": 3820.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "MSFS.In.FfbTrimCyclicPitch",
+          "SimVar": "L:FFB_CYCLIC_PITCH_TRIM",
+          "Unit": "number"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "MSFS.In.FfbTrimCyclicRoll",
+          "SimVar": "L:FFB_CYCLIC_ROLL_TRIM",
+          "Unit": "number"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "MSFS.In.FfbTrimCollective",
+          "SimVar": "L:FFB_COLLECTIVE_TRIM",
+          "Unit": "number"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "MSFS.In.FfbTrimPedals",
+          "SimVar": "L:FFB_PEDALS_TRIM",
+          "Unit": "number"
+        }
+      ],
+      "SignalGroup": "MSFS"
+    },
+    {
+      "Id": "msfs_ffbapi_tr",
+      "Title": "",
+      "Kind": "MsfsVarDef",
+      "X": 50.0,
+      "Y": 4050.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "MSFS.In.FfbTrOnCyclic",
+          "SimVar": "L:FFB_CYCLIC_TR_ON",
+          "Unit": "number"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "MSFS.In.FfbTrOnCollective",
+          "SimVar": "L:FFB_COLLECTIVE_TR_ON",
+          "Unit": "number"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "MSFS.In.FfbTrOnPedals",
+          "SimVar": "L:FFB_PEDALS_TR_ON",
+          "Unit": "number"
+        }
+      ],
+      "SignalGroup": "MSFS"
+    },
+    {
+      "Id": "msfs_ffbapi_hyd",
+      "Title": "",
+      "Kind": "MsfsVarDef",
+      "X": 50.0,
+      "Y": 4240.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "MSFS.In.FfbHydCyclicPitch",
+          "SimVar": "L:FFB_CYCLIC_PITCH_HYD_ASSIST_LOSS",
+          "Unit": "number"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "MSFS.In.FfbHydCyclicRoll",
+          "SimVar": "L:FFB_CYCLIC_ROLL_HYD_ASSIST_LOSS",
+          "Unit": "number"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "MSFS.In.FfbHydCollective",
+          "SimVar": "L:FFB_COLLECTIVE_HYD_ASSIST_LOSS",
+          "Unit": "number"
+        },
+        {
+          "Kind": "Output",
+          "SignalSuffix": "MSFS.In.FfbHydPedals",
+          "SimVar": "L:FFB_PEDALS_HYD_ASSIST_LOSS",
+          "Unit": "number"
+        }
+      ],
+      "SignalGroup": "MSFS"
+    },
+    {
+      "Id": "expr_api_supported",
+      "Title": "API v>=1",
+      "Kind": "Expr",
+      "X": 430.0,
+      "Y": 3680.0,
+      "Ports": [
+        {
+          "Name": "v",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "Expr": "(v >= 1)"
+    },
+    {
+      "Id": "expr_has_trim_cyclic",
+      "Title": "CYCLIC trim (bit 0)",
+      "Kind": "Expr",
+      "X": 690.0,
+      "Y": 3680.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "f",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "Expr": "(a > 0.5) && (Floor(Floor(f + 0.5) / 1) % 2 == 1)"
+    },
+    {
+      "Id": "expr_has_trim_coll",
+      "Title": "COLLECTIVE trim (bit 1)",
+      "Kind": "Expr",
+      "X": 690.0,
+      "Y": 3760.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "f",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "Expr": "(a > 0.5) && (Floor(Floor(f + 0.5) / 2) % 2 == 1)"
+    },
+    {
+      "Id": "expr_has_trim_ped",
+      "Title": "PEDALS trim (bit 2)",
+      "Kind": "Expr",
+      "X": 690.0,
+      "Y": 3840.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "f",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "Expr": "(a > 0.5) && (Floor(Floor(f + 0.5) / 4) % 2 == 1)"
+    },
+    {
+      "Id": "param_ffb_enable_cyclic",
+      "Kind": "Param",
+      "X": 430.0,
+      "Y": 4090.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FfbApiEnable"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "expr_ffb_enable_cyclic",
+      "Title": "Cyclic FFB mode",
+      "Kind": "Expr",
+      "X": 690.0,
+      "Y": 4030.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "p",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "Expr": "(a > 0.5) && (p > 0.5)"
+    },
+    {
+      "Id": "msfs_out_enable_cyclic",
+      "Title": "MSFS Vars Out",
+      "Kind": "MsfsVarOut",
+      "X": 950.0,
+      "Y": 4030.0,
+      "Ports": [
+        {
+          "Name": "MSFS.Out.FfbEnableCyclic",
+          "Kind": "Input",
+          "SimVar": "L:FFB_CYCLIC_ENABLED",
+          "Unit": "number"
+        }
+      ]
+    },
+    {
+      "Id": "param_ffb_enable_collective",
+      "Kind": "Param",
+      "X": 430.0,
+      "Y": 4180.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FfbApiEnable"
+        }
+      ],
+      "SignalGroup": "FlightStickCollective"
+    },
+    {
+      "Id": "expr_ffb_enable_collective",
+      "Title": "Collective FFB mode",
+      "Kind": "Expr",
+      "X": 690.0,
+      "Y": 4120.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "p",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "Expr": "(a > 0.5) && (p > 0.5)"
+    },
+    {
+      "Id": "msfs_out_enable_collective",
+      "Title": "MSFS Vars Out",
+      "Kind": "MsfsVarOut",
+      "X": 950.0,
+      "Y": 4120.0,
+      "Ports": [
+        {
+          "Name": "MSFS.Out.FfbEnableCollective",
+          "Kind": "Input",
+          "SimVar": "L:FFB_COLLECTIVE_ENABLED",
+          "Unit": "number"
+        }
+      ]
+    },
+    {
+      "Id": "param_ffb_enable_pedals",
+      "Kind": "Param",
+      "X": 430.0,
+      "Y": 4270.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FfbApiEnable"
+        }
+      ],
+      "SignalGroup": "FlightPedals"
+    },
+    {
+      "Id": "expr_ffb_enable_pedals",
+      "Title": "Pedals FFB mode",
+      "Kind": "Expr",
+      "X": 690.0,
+      "Y": 4210.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "p",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "Expr": "(a > 0.5) && (p > 0.5)"
+    },
+    {
+      "Id": "msfs_out_enable_pedals",
+      "Title": "MSFS Vars Out",
+      "Kind": "MsfsVarOut",
+      "X": 950.0,
+      "Y": 4210.0,
+      "Ports": [
+        {
+          "Name": "MSFS.Out.FfbEnablePedals",
+          "Kind": "Input",
+          "SimVar": "L:FFB_PEDALS_ENABLED",
+          "Unit": "number"
+        }
+      ]
+    },
+    {
+      "Id": "bus_send_ffbapi",
+      "Title": "FFB API Bus Send",
+      "Kind": "LocalSend",
+      "X": 1190.0,
+      "Y": 3680.0,
+      "Ports": [
+        {
+          "Name": "FfbTrimPitch",
+          "Kind": "Input",
+          "BusName": "FfbTrimPitch"
+        },
+        {
+          "Name": "FfbTrimRoll",
+          "Kind": "Input",
+          "BusName": "FfbTrimRoll"
+        },
+        {
+          "Name": "FfbTrimColl",
+          "Kind": "Input",
+          "BusName": "FfbTrimColl"
+        },
+        {
+          "Name": "FfbTrimPed",
+          "Kind": "Input",
+          "BusName": "FfbTrimPed"
+        },
+        {
+          "Name": "FfbTrOnCyclic",
+          "Kind": "Input",
+          "BusName": "FfbTrOnCyclic"
+        },
+        {
+          "Name": "FfbTrOnColl",
+          "Kind": "Input",
+          "BusName": "FfbTrOnColl"
+        },
+        {
+          "Name": "FfbTrOnPed",
+          "Kind": "Input",
+          "BusName": "FfbTrOnPed"
+        },
+        {
+          "Name": "FfbHasTrimCyclic",
+          "Kind": "Input",
+          "BusName": "FfbHasTrimCyclic"
+        },
+        {
+          "Name": "FfbHasTrimColl",
+          "Kind": "Input",
+          "BusName": "FfbHasTrimColl"
+        },
+        {
+          "Name": "FfbHasTrimPed",
+          "Kind": "Input",
+          "BusName": "FfbHasTrimPed"
+        },
+        {
+          "Name": "FfbHydPitch",
+          "Kind": "Input",
+          "BusName": "FfbHydPitch"
+        },
+        {
+          "Name": "FfbHydRoll",
+          "Kind": "Input",
+          "BusName": "FfbHydRoll"
+        },
+        {
+          "Name": "FfbHydColl",
+          "Kind": "Input",
+          "BusName": "FfbHydColl"
+        },
+        {
+          "Name": "FfbHydPed",
+          "Kind": "Input",
+          "BusName": "FfbHydPed"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_ffbapi_pitch",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 320.0,
+      "Y": 2380.0,
+      "Ports": [
+        {
+          "Name": "FfbTrimPitch",
+          "Kind": "Output",
+          "BusName": "FfbTrimPitch"
+        },
+        {
+          "Name": "FfbTrOnCyclic",
+          "Kind": "Output",
+          "BusName": "FfbTrOnCyclic"
+        },
+        {
+          "Name": "FfbHasTrimCyclic",
+          "Kind": "Output",
+          "BusName": "FfbHasTrimCyclic"
+        },
+        {
+          "Name": "FfbHydPitch",
+          "Kind": "Output",
+          "BusName": "FfbHydPitch"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_ffbapi_roll",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 410.0,
+      "Y": 3430.0,
+      "Ports": [
+        {
+          "Name": "FfbTrimRoll",
+          "Kind": "Output",
+          "BusName": "FfbTrimRoll"
+        },
+        {
+          "Name": "FfbTrOnCyclic",
+          "Kind": "Output",
+          "BusName": "FfbTrOnCyclic"
+        },
+        {
+          "Name": "FfbHasTrimCyclic",
+          "Kind": "Output",
+          "BusName": "FfbHasTrimCyclic"
+        },
+        {
+          "Name": "FfbHydRoll",
+          "Kind": "Output",
+          "BusName": "FfbHydRoll"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_ffbapi_coll",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 310.0,
+      "Y": 1520.0,
+      "Ports": [
+        {
+          "Name": "FfbTrimColl",
+          "Kind": "Output",
+          "BusName": "FfbTrimColl"
+        },
+        {
+          "Name": "FfbTrOnColl",
+          "Kind": "Output",
+          "BusName": "FfbTrOnColl"
+        },
+        {
+          "Name": "FfbHasTrimColl",
+          "Kind": "Output",
+          "BusName": "FfbHasTrimColl"
+        },
+        {
+          "Name": "FfbHydColl",
+          "Kind": "Output",
+          "BusName": "FfbHydColl"
+        }
+      ]
+    },
+    {
+      "Id": "bus_recv_ffbapi_ped",
+      "Title": "Bus Recv",
+      "Kind": "LocalReceive",
+      "X": 320.0,
+      "Y": 1020.0,
+      "Ports": [
+        {
+          "Name": "FfbTrimPed",
+          "Kind": "Output",
+          "BusName": "FfbTrimPed"
+        },
+        {
+          "Name": "FfbTrOnPed",
+          "Kind": "Output",
+          "BusName": "FfbTrOnPed"
+        },
+        {
+          "Name": "FfbHasTrimPed",
+          "Kind": "Output",
+          "BusName": "FfbHasTrimPed"
+        },
+        {
+          "Name": "FfbHydPed",
+          "Kind": "Output",
+          "BusName": "FfbHydPed"
+        }
+      ]
+    },
+    {
+      "Id": "msfs_out_ft_pitch",
+      "Title": "MSFS Vars Out",
+      "Kind": "MsfsVarOut",
+      "X": 940.0,
+      "Y": 1850.0,
+      "Ports": [
+        {
+          "Name": "MSFS.Out.FfbFlyThroughCyclicPitch",
+          "Kind": "Input",
+          "SimVar": "L:FFB_CYCLIC_PITCH_FLY_THROUGH",
+          "Unit": "number"
+        }
+      ]
+    },
+    {
+      "Id": "msfs_out_ft_roll",
+      "Title": "MSFS Vars Out",
+      "Kind": "MsfsVarOut",
+      "X": 1390.0,
+      "Y": 2800.0,
+      "Ports": [
+        {
+          "Name": "MSFS.Out.FfbFlyThroughCyclicRoll",
+          "Kind": "Input",
+          "SimVar": "L:FFB_CYCLIC_ROLL_FLY_THROUGH",
+          "Unit": "number"
+        }
+      ]
+    },
+    {
+      "Id": "msfs_out_ft_coll",
+      "Title": "MSFS Vars Out",
+      "Kind": "MsfsVarOut",
+      "X": 820.0,
+      "Y": 1380.0,
+      "Ports": [
+        {
+          "Name": "MSFS.Out.FfbFlyThroughCollective",
+          "Kind": "Input",
+          "SimVar": "L:FFB_COLLECTIVE_FLY_THROUGH",
+          "Unit": "number"
+        }
+      ]
+    },
+    {
+      "Id": "msfs_out_ft_ped",
+      "Title": "MSFS Vars Out",
+      "Kind": "MsfsVarOut",
+      "X": 720.0,
+      "Y": 770.0,
+      "Ports": [
+        {
+          "Name": "MSFS.Out.FfbFlyThroughPedals",
+          "Kind": "Input",
+          "SimVar": "L:FFB_PEDALS_FLY_THROUGH",
+          "Unit": "number"
+        }
+      ]
+    }
+  ],
+  "Links": [
+    {
+      "FromNodeId": "in_derivations_raw",
+      "FromPort": "Speed.TAS",
+      "ToNodeId": "derivations_include",
+      "ToPort": "tas_kts"
+    },
+    {
+      "FromNodeId": "param_owl",
+      "FromPort": "OWL",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "owl"
+    },
+    {
+      "FromNodeId": "in_axis_pitch",
+      "FromPort": "FlightStickPitch.Position",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "axis_position"
+    },
+    {
+      "FromNodeId": "const_owl_off",
+      "FromPort": "out",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "owl"
+    },
+    {
+      "FromNodeId": "in_axis_roll",
+      "FromPort": "FlightStickRoll.Position",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "axis_position"
+    },
+    {
+      "FromNodeId": "const_phase_zero",
+      "FromPort": "out",
+      "ToNodeId": "vib_pitch_include",
+      "ToPort": "phase"
+    },
+    {
+      "FromNodeId": "mul_phase_roll",
+      "FromPort": "a*b",
+      "ToNodeId": "vib_roll_include",
+      "ToPort": "phase"
+    },
+    {
+      "FromNodeId": "param_tr_blade_count",
+      "FromPort": "TRBladeCount",
+      "ToNodeId": "vib_pedal_include",
+      "ToPort": "tr_blade_count"
+    },
+    {
+      "FromNodeId": "param_tr_gear_ratio",
+      "FromPort": "TRGearRatio",
+      "ToNodeId": "vib_pedal_include",
+      "ToPort": "tr_gear"
+    },
+    {
+      "FromNodeId": "96841bc9a8204e6285da2eb18b924e0c",
+      "FromPort": "a/b",
+      "ToNodeId": "540bd050ff4944be849a35b8fa047f7d",
+      "ToPort": "Vib1Fund"
+    },
+    {
+      "FromNodeId": "in_torque",
+      "FromPort": "MainRotor.Speed",
+      "ToNodeId": "96841bc9a8204e6285da2eb18b924e0c",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "5a3cec22fab74cc09233193cba8135cd",
+      "FromPort": "out",
+      "ToNodeId": "96841bc9a8204e6285da2eb18b924e0c",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "param_rbs_load_pitch",
+      "FromPort": "RbsLoadPitchGain",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "rbs_load_gain_eff"
+    },
+    {
+      "FromNodeId": "param_rbs_load_roll",
+      "FromPort": "RbsLoadRollGain",
+      "ToNodeId": "mul_rbs_roll_eff",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "mul_rbs_roll_eff",
+      "FromPort": "a*b",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "rbs_load_gain_eff"
+    },
+    {
+      "FromNodeId": "param_etl_bump_load_pitch",
+      "FromPort": "EtlBumpLoadGain",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "etl_load_gain_eff"
+    },
+    {
+      "FromNodeId": "param_etl_bump_load_roll",
+      "FromPort": "EtlBumpLoadRollGain",
+      "ToNodeId": "mul_etl_roll_eff",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "mul_etl_roll_eff",
+      "FromPort": "a*b",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "etl_load_gain_eff"
+    },
+    {
+      "FromNodeId": "in_derivations_raw",
+      "FromPort": "MainRotor.Speed",
+      "ToNodeId": "derivations_include",
+      "ToPort": "main_rotor_rpm"
+    },
+    {
+      "FromNodeId": "in_derivations_raw",
+      "FromPort": "Angle.Beta",
+      "ToNodeId": "derivations_include",
+      "ToPort": "beta_deg"
+    },
+    {
+      "FromNodeId": "in_derivations_raw",
+      "FromPort": "VVI.World",
+      "ToNodeId": "derivations_include",
+      "ToPort": "vvi_fps"
+    },
+    {
+      "FromNodeId": "in_derivations_raw",
+      "FromPort": "Eng.TorquePct",
+      "ToNodeId": "derivations_include",
+      "ToPort": "eng_torque_pct"
+    },
+    {
+      "FromNodeId": "in_derivations_raw",
+      "FromPort": "G_Nrml",
+      "ToNodeId": "derivations_include",
+      "ToPort": "g_force"
+    },
+    {
+      "FromNodeId": "in_derivations_raw",
+      "FromPort": "Collective.Position",
+      "ToNodeId": "derivations_include",
+      "ToPort": "collective_pos_pct"
+    },
+    {
+      "FromNodeId": "param_g_load_gain",
+      "FromPort": "GLoadGain",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "g_load_gain_eff"
+    },
+    {
+      "FromNodeId": "param_g_load_roll_gain",
+      "FromPort": "GLoadRollGain",
+      "ToNodeId": "mul_g_roll_eff",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "mul_g_roll_eff",
+      "FromPort": "a*b*c",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "g_load_gain_eff"
+    },
+    {
+      "FromNodeId": "in_derivations_raw",
+      "FromPort": "TailRotor.BladePitchPct",
+      "ToNodeId": "derivations_include",
+      "ToPort": "tr_pitch_pct"
+    },
+    {
+      "FromNodeId": "in_on_ground",
+      "FromPort": "OnGround",
+      "ToNodeId": "gnd_cues_include",
+      "ToPort": "on_ground"
+    },
+    {
+      "FromNodeId": "derivations_include",
+      "FromPort": "ETLBump",
+      "ToNodeId": "bus_send_rotor",
+      "ToPort": "ETLBump"
+    },
+    {
+      "FromNodeId": "derivations_include",
+      "FromPort": "RBS",
+      "ToNodeId": "bus_send_rotor",
+      "ToPort": "RBS"
+    },
+    {
+      "FromNodeId": "derivations_include",
+      "FromPort": "BladeAlphPitch",
+      "ToNodeId": "bus_send_rotor",
+      "ToPort": "BladeAlphaPitch"
+    },
+    {
+      "FromNodeId": "derivations_include",
+      "FromPort": "BladeAlphRoll",
+      "ToNodeId": "bus_send_rotor",
+      "ToPort": "BladeAlphaRoll"
+    },
+    {
+      "FromNodeId": "derivations_include",
+      "FromPort": "VRS",
+      "ToNodeId": "bus_send_rotor",
+      "ToPort": "VRS"
+    },
+    {
+      "FromNodeId": "derivations_include",
+      "FromPort": "Slap",
+      "ToNodeId": "bus_send_rotor",
+      "ToPort": "Slap"
+    },
+    {
+      "FromNodeId": "derivations_include",
+      "FromPort": "TrqNorm",
+      "ToNodeId": "bus_send_rotor",
+      "ToPort": "TRQnorm"
+    },
+    {
+      "FromNodeId": "derivations_include",
+      "FromPort": "GLoad",
+      "ToNodeId": "bus_send_rotor",
+      "ToPort": "GLoad"
+    },
+    {
+      "FromNodeId": "derivations_include",
+      "FromPort": "Mu",
+      "ToNodeId": "bus_send_rotor",
+      "ToPort": "Mu"
+    },
+    {
+      "FromNodeId": "derivations_include",
+      "FromPort": "TrInflow",
+      "ToNodeId": "bus_send_rotor",
+      "ToPort": "TrInflow"
+    },
+    {
+      "FromNodeId": "derivations_include",
+      "FromPort": "Turb",
+      "ToNodeId": "bus_send_rotor",
+      "ToPort": "Turb"
+    },
+    {
+      "FromNodeId": "derivations_include",
+      "FromPort": "RPMnorm",
+      "ToNodeId": "bus_send_rotor",
+      "ToPort": "RPMnorm"
+    },
+    {
+      "FromNodeId": "derivations_include",
+      "FromPort": "MuBuzz",
+      "ToNodeId": "bus_send_rotor",
+      "ToPort": "MuBuzz"
+    },
+    {
+      "FromNodeId": "derivations_include",
+      "FromPort": "TrBuffetGate",
+      "ToNodeId": "bus_send_rotor",
+      "ToPort": "TrBuffetGate"
+    },
+    {
+      "FromNodeId": "param_blade_count",
+      "FromPort": "BladeCount",
+      "ToNodeId": "bus_send_params",
+      "ToPort": "BladeCount"
+    },
+    {
+      "FromNodeId": "param_rotation_sign",
+      "FromPort": "RotationSign",
+      "ToNodeId": "bus_send_params",
+      "ToPort": "RotationSign"
+    },
+    {
+      "FromNodeId": "gnd_cues_include",
+      "FromPort": "gnd_boost",
+      "ToNodeId": "bus_send_ground",
+      "ToPort": "GndBoost"
+    },
+    {
+      "FromNodeId": "gnd_cues_include",
+      "FromPort": "gnd_buffet",
+      "ToNodeId": "bus_send_ground",
+      "ToPort": "GndBuffet"
+    },
+    {
+      "FromNodeId": "bus_recv_derivations",
+      "FromPort": "RotationSign",
+      "ToNodeId": "derivations_include",
+      "ToPort": "rot_sign"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_pitch",
+      "FromPort": "BladeAlphaPitch",
+      "ToNodeId": "vib_pitch_include",
+      "ToPort": "blade_alph"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_pitch",
+      "FromPort": "VRS",
+      "ToNodeId": "vib_pitch_include",
+      "ToPort": "vrs"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_pitch",
+      "FromPort": "Slap",
+      "ToNodeId": "vib_pitch_include",
+      "ToPort": "slap_rat"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_pitch",
+      "FromPort": "RPMnorm",
+      "ToNodeId": "vib_pitch_include",
+      "ToPort": "rpm_norm"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_pitch",
+      "FromPort": "BladeCount",
+      "ToNodeId": "vib_pitch_include",
+      "ToPort": "blade_count"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_pitch",
+      "FromPort": "ETLBump",
+      "ToNodeId": "vib_pitch_include",
+      "ToPort": "etl_bump"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_pitch",
+      "FromPort": "RBS",
+      "ToNodeId": "vib_pitch_include",
+      "ToPort": "rbs"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_pitch",
+      "FromPort": "MuBuzz",
+      "ToNodeId": "vib_pitch_include",
+      "ToPort": "mu_buzz"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_pitch",
+      "FromPort": "GndBoost",
+      "ToNodeId": "vib_pitch_include",
+      "ToPort": "gnd_boost"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_roll",
+      "FromPort": "BladeAlphaRoll",
+      "ToNodeId": "vib_roll_include",
+      "ToPort": "blade_alph"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_roll",
+      "FromPort": "VRS",
+      "ToNodeId": "vib_roll_include",
+      "ToPort": "vrs"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_roll",
+      "FromPort": "Slap",
+      "ToNodeId": "vib_roll_include",
+      "ToPort": "slap_rat"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_roll",
+      "FromPort": "RPMnorm",
+      "ToNodeId": "vib_roll_include",
+      "ToPort": "rpm_norm"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_roll",
+      "FromPort": "BladeCount",
+      "ToNodeId": "vib_roll_include",
+      "ToPort": "blade_count"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_roll",
+      "FromPort": "ETLBump",
+      "ToNodeId": "vib_roll_include",
+      "ToPort": "etl_bump"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_roll",
+      "FromPort": "RBS",
+      "ToNodeId": "vib_roll_include",
+      "ToPort": "rbs"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_roll",
+      "FromPort": "MuBuzz",
+      "ToNodeId": "vib_roll_include",
+      "ToPort": "mu_buzz"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_roll",
+      "FromPort": "GndBoost",
+      "ToNodeId": "vib_roll_include",
+      "ToPort": "gnd_boost"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_roll",
+      "FromPort": "RotationSign",
+      "ToNodeId": "mul_phase_roll",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "bus_recv_roll_glue",
+      "FromPort": "RotationSign",
+      "ToNodeId": "mul_etl_roll_eff",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "bus_recv_roll_glue",
+      "FromPort": "RotationSign",
+      "ToNodeId": "mul_rbs_roll_eff",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "bus_recv_roll_glue",
+      "FromPort": "RotationSign",
+      "ToNodeId": "mul_g_roll_eff",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "bus_recv_collective",
+      "FromPort": "TRQnorm",
+      "ToNodeId": "collective_include",
+      "ToPort": "torque_norm"
+    },
+    {
+      "FromNodeId": "bus_recv_collective",
+      "FromPort": "VRS",
+      "ToNodeId": "collective_include",
+      "ToPort": "vrs"
+    },
+    {
+      "FromNodeId": "bus_recv_collective",
+      "FromPort": "RPMnorm",
+      "ToNodeId": "collective_include",
+      "ToPort": "rpm_norm"
+    },
+    {
+      "FromNodeId": "bus_recv_collective",
+      "FromPort": "GndBuffet",
+      "ToNodeId": "collective_include",
+      "ToPort": "gnd_buffet"
+    },
+    {
+      "FromNodeId": "bus_recv_collective",
+      "FromPort": "Turb",
+      "ToNodeId": "collective_include",
+      "ToPort": "turb"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_collective",
+      "FromPort": "RPMnorm",
+      "ToNodeId": "vib_collective_include",
+      "ToPort": "rpm_norm"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_collective",
+      "FromPort": "BladeCount",
+      "ToNodeId": "vib_collective_include",
+      "ToPort": "blade_count"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_collective",
+      "FromPort": "VRS",
+      "ToNodeId": "vib_collective_include",
+      "ToPort": "vrs"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_collective",
+      "FromPort": "Slap",
+      "ToNodeId": "vib_collective_include",
+      "ToPort": "slap_rat"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_collective",
+      "FromPort": "ETLBump",
+      "ToNodeId": "vib_collective_include",
+      "ToPort": "etl_bump"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_collective",
+      "FromPort": "RBS",
+      "ToNodeId": "vib_collective_include",
+      "ToPort": "rbs"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_collective",
+      "FromPort": "GndBoost",
+      "ToNodeId": "vib_collective_include",
+      "ToPort": "gnd_boost"
+    },
+    {
+      "FromNodeId": "bus_recv_pedals",
+      "FromPort": "RPMnorm",
+      "ToNodeId": "pedals_include",
+      "ToPort": "rpm_norm"
+    },
+    {
+      "FromNodeId": "bus_recv_pedals",
+      "FromPort": "RotationSign",
+      "ToNodeId": "pedals_include",
+      "ToPort": "rot_sign"
+    },
+    {
+      "FromNodeId": "bus_recv_pedals",
+      "FromPort": "TrInflow",
+      "ToNodeId": "pedals_include",
+      "ToPort": "tr_inflow"
+    },
+    {
+      "FromNodeId": "bus_recv_pedals",
+      "FromPort": "TrBuffetGate",
+      "ToNodeId": "pedals_include",
+      "ToPort": "buffet_gate"
+    },
+    {
+      "FromNodeId": "bus_recv_pedals",
+      "FromPort": "Turb",
+      "ToNodeId": "pedals_include",
+      "ToPort": "turb"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_pedal",
+      "FromPort": "RPMnorm",
+      "ToNodeId": "vib_pedal_include",
+      "ToPort": "rpm_norm"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_pedal",
+      "FromPort": "BladeCount",
+      "ToNodeId": "vib_pedal_include",
+      "ToPort": "blade_count"
+    },
+    {
+      "FromNodeId": "bus_recv_vib_pedal",
+      "FromPort": "GndBoost",
+      "ToNodeId": "vib_pedal_include",
+      "ToPort": "gnd_boost"
+    },
+    {
+      "FromNodeId": "const_phase_90",
+      "FromPort": "out",
+      "ToNodeId": "mul_phase_roll",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "bus_recv_roll_glue",
+      "FromPort": "Mu",
+      "ToNodeId": "mul_g_roll_eff",
+      "ToPort": "c"
+    },
+    {
+      "FromNodeId": "bus_recv_cyclic_pitch_pre",
+      "FromPort": "BladeAlphaPitch",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "blade_alph"
+    },
+    {
+      "FromNodeId": "bus_recv_cyclic_pitch_pre",
+      "FromPort": "RPMnorm",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "rpm_norm"
+    },
+    {
+      "FromNodeId": "bus_recv_cyclic_pitch_cues",
+      "FromPort": "ETLBump",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "etl_bump"
+    },
+    {
+      "FromNodeId": "bus_recv_cyclic_pitch_cues",
+      "FromPort": "VRS",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "vrs"
+    },
+    {
+      "FromNodeId": "bus_recv_cyclic_pitch_cues",
+      "FromPort": "RBS",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "rbs"
+    },
+    {
+      "FromNodeId": "bus_recv_cyclic_pitch_cues",
+      "FromPort": "GLoad",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "g_load"
+    },
+    {
+      "FromNodeId": "bus_recv_cyclic_pitch_cues",
+      "FromPort": "GndBuffet",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "gnd_buffet"
+    },
+    {
+      "FromNodeId": "bus_recv_cyclic_pitch_cues",
+      "FromPort": "Turb",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "turb"
+    },
+    {
+      "FromNodeId": "bus_recv_cyclic_roll_pre",
+      "FromPort": "BladeAlphaRoll",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "blade_alph"
+    },
+    {
+      "FromNodeId": "bus_recv_cyclic_roll_pre",
+      "FromPort": "RPMnorm",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "rpm_norm"
+    },
+    {
+      "FromNodeId": "bus_recv_cyclic_roll_cues",
+      "FromPort": "ETLBump",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "etl_bump"
+    },
+    {
+      "FromNodeId": "bus_recv_cyclic_roll_cues",
+      "FromPort": "VRS",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "vrs"
+    },
+    {
+      "FromNodeId": "bus_recv_cyclic_roll_cues",
+      "FromPort": "RBS",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "rbs"
+    },
+    {
+      "FromNodeId": "bus_recv_cyclic_roll_cues",
+      "FromPort": "GLoad",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "g_load"
+    },
+    {
+      "FromNodeId": "bus_recv_cyclic_roll_cues",
+      "FromPort": "GndBuffet",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "gnd_buffet"
+    },
+    {
+      "FromNodeId": "bus_recv_cyclic_roll_cues",
+      "FromPort": "Turb",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "turb"
+    },
+    {
+      "FromNodeId": "derivations_include",
+      "FromPort": "Descent",
+      "ToNodeId": "bus_send_rotor",
+      "ToPort": "Descent"
+    },
+    {
+      "FromNodeId": "bus_recv_ground",
+      "FromPort": "Descent",
+      "ToNodeId": "gnd_cues_include",
+      "ToPort": "descent_fpm"
+    },
+    {
+      "FromNodeId": "in_on_ground",
+      "FromPort": "GroundSpeed",
+      "ToNodeId": "gnd_cues_include",
+      "ToPort": "ground_speed"
+    },
+    {
+      "FromNodeId": "collective_include",
+      "FromPort": "pos_virt",
+      "ToNodeId": "44bc055423da4d53a9565d5d2586f541",
+      "ToPort": "MSFS.Out.Collective"
+    },
+    {
+      "FromNodeId": "cyclic_pitch_include",
+      "FromPort": "pos_virt",
+      "ToNodeId": "54214133525e48dc849872e63f121fba",
+      "ToPort": "MSFS.Out.Pitch"
+    },
+    {
+      "FromNodeId": "cyclic_roll_include",
+      "FromPort": "pos_virt",
+      "ToNodeId": "163d4878dd0b455dbfed260905b4c1ef",
+      "ToPort": "MSFS.Out.Roll"
+    },
+    {
+      "FromNodeId": "dae6ad6a85514644bf1a9186089cfd1f",
+      "FromPort": "FlightStickCollective.Position",
+      "ToNodeId": "collective_include",
+      "ToPort": "axis_position"
+    },
+    {
+      "FromNodeId": "5a1f8f7a87fb4588a66ea1759c4c2fc4",
+      "FromPort": "FlightPedals.Position",
+      "ToNodeId": "pedals_include",
+      "ToPort": "axis_pos"
+    },
+    {
+      "FromNodeId": "pedals_include",
+      "FromPort": "pos_virt",
+      "ToNodeId": "4ccf8ad7e2b14d8db76d8e16a9b13255",
+      "ToPort": "MSFS.Out.Pedals"
+    },
+    {
+      "FromNodeId": "in_on_ground",
+      "FromPort": "OnGround",
+      "ToNodeId": "e634c30cac56429eb13d18c89f255ff5",
+      "ToPort": "in_0"
+    },
+    {
+      "FromNodeId": "in_axis_pitch",
+      "FromPort": "FlightStickPitch.Center",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "axis_center"
+    },
+    {
+      "FromNodeId": "in_axis_roll",
+      "FromPort": "FlightStickRoll.Center",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "axis_center"
+    },
+    {
+      "FromNodeId": "in_axis_pitch",
+      "FromPort": "FlightStickPitch.Force",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "axis_force"
+    },
+    {
+      "FromNodeId": "in_axis_roll",
+      "FromPort": "FlightStickRoll.Force",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "axis_force"
+    },
+    {
+      "FromNodeId": "dae6ad6a85514644bf1a9186089cfd1f",
+      "FromPort": "FlightStickCollective.Center",
+      "ToNodeId": "collective_include",
+      "ToPort": "axis_center"
+    },
+    {
+      "FromNodeId": "dae6ad6a85514644bf1a9186089cfd1f",
+      "FromPort": "FlightStickCollective.Force",
+      "ToNodeId": "collective_include",
+      "ToPort": "axis_force"
+    },
+    {
+      "FromNodeId": "5a1f8f7a87fb4588a66ea1759c4c2fc4",
+      "FromPort": "FlightPedals.Center",
+      "ToNodeId": "pedals_include",
+      "ToPort": "axis_center"
+    },
+    {
+      "FromNodeId": "5a1f8f7a87fb4588a66ea1759c4c2fc4",
+      "FromPort": "FlightPedals.Left.Force",
+      "ToNodeId": "pedals_include",
+      "ToPort": "axis_force_left"
+    },
+    {
+      "FromNodeId": "5a1f8f7a87fb4588a66ea1759c4c2fc4",
+      "FromPort": "FlightPedals.Right.Force",
+      "ToNodeId": "pedals_include",
+      "ToPort": "axis_force_right"
+    },
+    {
+      "FromNodeId": "msfs_ffbapi_discovery",
+      "FromPort": "MSFS.In.FfbApiVersion",
+      "ToNodeId": "expr_api_supported",
+      "ToPort": "v"
+    },
+    {
+      "FromNodeId": "expr_api_supported",
+      "FromPort": "out",
+      "ToNodeId": "expr_has_trim_cyclic",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "msfs_ffbapi_discovery",
+      "FromPort": "MSFS.In.FfbFeatures",
+      "ToNodeId": "expr_has_trim_cyclic",
+      "ToPort": "f"
+    },
+    {
+      "FromNodeId": "expr_api_supported",
+      "FromPort": "out",
+      "ToNodeId": "expr_has_trim_coll",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "msfs_ffbapi_discovery",
+      "FromPort": "MSFS.In.FfbFeatures",
+      "ToNodeId": "expr_has_trim_coll",
+      "ToPort": "f"
+    },
+    {
+      "FromNodeId": "expr_api_supported",
+      "FromPort": "out",
+      "ToNodeId": "expr_has_trim_ped",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "msfs_ffbapi_discovery",
+      "FromPort": "MSFS.In.FfbFeatures",
+      "ToNodeId": "expr_has_trim_ped",
+      "ToPort": "f"
+    },
+    {
+      "FromNodeId": "expr_api_supported",
+      "FromPort": "out",
+      "ToNodeId": "expr_ffb_enable_cyclic",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "param_ffb_enable_cyclic",
+      "FromPort": "FfbApiEnable",
+      "ToNodeId": "expr_ffb_enable_cyclic",
+      "ToPort": "p"
+    },
+    {
+      "FromNodeId": "expr_ffb_enable_cyclic",
+      "FromPort": "out",
+      "ToNodeId": "msfs_out_enable_cyclic",
+      "ToPort": "MSFS.Out.FfbEnableCyclic"
+    },
+    {
+      "FromNodeId": "expr_api_supported",
+      "FromPort": "out",
+      "ToNodeId": "expr_ffb_enable_collective",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "param_ffb_enable_collective",
+      "FromPort": "FfbApiEnable",
+      "ToNodeId": "expr_ffb_enable_collective",
+      "ToPort": "p"
+    },
+    {
+      "FromNodeId": "expr_ffb_enable_collective",
+      "FromPort": "out",
+      "ToNodeId": "msfs_out_enable_collective",
+      "ToPort": "MSFS.Out.FfbEnableCollective"
+    },
+    {
+      "FromNodeId": "expr_api_supported",
+      "FromPort": "out",
+      "ToNodeId": "expr_ffb_enable_pedals",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "param_ffb_enable_pedals",
+      "FromPort": "FfbApiEnable",
+      "ToNodeId": "expr_ffb_enable_pedals",
+      "ToPort": "p"
+    },
+    {
+      "FromNodeId": "expr_ffb_enable_pedals",
+      "FromPort": "out",
+      "ToNodeId": "msfs_out_enable_pedals",
+      "ToPort": "MSFS.Out.FfbEnablePedals"
+    },
+    {
+      "FromNodeId": "msfs_ffbapi_trim",
+      "FromPort": "MSFS.In.FfbTrimCyclicPitch",
+      "ToNodeId": "bus_send_ffbapi",
+      "ToPort": "FfbTrimPitch"
+    },
+    {
+      "FromNodeId": "msfs_ffbapi_trim",
+      "FromPort": "MSFS.In.FfbTrimCyclicRoll",
+      "ToNodeId": "bus_send_ffbapi",
+      "ToPort": "FfbTrimRoll"
+    },
+    {
+      "FromNodeId": "msfs_ffbapi_trim",
+      "FromPort": "MSFS.In.FfbTrimCollective",
+      "ToNodeId": "bus_send_ffbapi",
+      "ToPort": "FfbTrimColl"
+    },
+    {
+      "FromNodeId": "msfs_ffbapi_trim",
+      "FromPort": "MSFS.In.FfbTrimPedals",
+      "ToNodeId": "bus_send_ffbapi",
+      "ToPort": "FfbTrimPed"
+    },
+    {
+      "FromNodeId": "msfs_ffbapi_tr",
+      "FromPort": "MSFS.In.FfbTrOnCyclic",
+      "ToNodeId": "bus_send_ffbapi",
+      "ToPort": "FfbTrOnCyclic"
+    },
+    {
+      "FromNodeId": "msfs_ffbapi_tr",
+      "FromPort": "MSFS.In.FfbTrOnCollective",
+      "ToNodeId": "bus_send_ffbapi",
+      "ToPort": "FfbTrOnColl"
+    },
+    {
+      "FromNodeId": "msfs_ffbapi_tr",
+      "FromPort": "MSFS.In.FfbTrOnPedals",
+      "ToNodeId": "bus_send_ffbapi",
+      "ToPort": "FfbTrOnPed"
+    },
+    {
+      "FromNodeId": "expr_has_trim_cyclic",
+      "FromPort": "out",
+      "ToNodeId": "bus_send_ffbapi",
+      "ToPort": "FfbHasTrimCyclic"
+    },
+    {
+      "FromNodeId": "expr_has_trim_coll",
+      "FromPort": "out",
+      "ToNodeId": "bus_send_ffbapi",
+      "ToPort": "FfbHasTrimColl"
+    },
+    {
+      "FromNodeId": "expr_has_trim_ped",
+      "FromPort": "out",
+      "ToNodeId": "bus_send_ffbapi",
+      "ToPort": "FfbHasTrimPed"
+    },
+    {
+      "FromNodeId": "msfs_ffbapi_hyd",
+      "FromPort": "MSFS.In.FfbHydCyclicPitch",
+      "ToNodeId": "bus_send_ffbapi",
+      "ToPort": "FfbHydPitch"
+    },
+    {
+      "FromNodeId": "msfs_ffbapi_hyd",
+      "FromPort": "MSFS.In.FfbHydCyclicRoll",
+      "ToNodeId": "bus_send_ffbapi",
+      "ToPort": "FfbHydRoll"
+    },
+    {
+      "FromNodeId": "msfs_ffbapi_hyd",
+      "FromPort": "MSFS.In.FfbHydCollective",
+      "ToNodeId": "bus_send_ffbapi",
+      "ToPort": "FfbHydColl"
+    },
+    {
+      "FromNodeId": "msfs_ffbapi_hyd",
+      "FromPort": "MSFS.In.FfbHydPedals",
+      "ToNodeId": "bus_send_ffbapi",
+      "ToPort": "FfbHydPed"
+    },
+    {
+      "FromNodeId": "bus_recv_ffbapi_pitch",
+      "FromPort": "FfbTrimPitch",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "api_trim"
+    },
+    {
+      "FromNodeId": "bus_recv_ffbapi_pitch",
+      "FromPort": "FfbTrOnCyclic",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "api_tr_on"
+    },
+    {
+      "FromNodeId": "bus_recv_ffbapi_pitch",
+      "FromPort": "FfbHasTrimCyclic",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "api_has_trim"
+    },
+    {
+      "FromNodeId": "bus_recv_ffbapi_pitch",
+      "FromPort": "FfbHydPitch",
+      "ToNodeId": "cyclic_pitch_include",
+      "ToPort": "hyd_loss"
+    },
+    {
+      "FromNodeId": "bus_recv_ffbapi_roll",
+      "FromPort": "FfbTrimRoll",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "api_trim"
+    },
+    {
+      "FromNodeId": "bus_recv_ffbapi_roll",
+      "FromPort": "FfbTrOnCyclic",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "api_tr_on"
+    },
+    {
+      "FromNodeId": "bus_recv_ffbapi_roll",
+      "FromPort": "FfbHasTrimCyclic",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "api_has_trim"
+    },
+    {
+      "FromNodeId": "bus_recv_ffbapi_roll",
+      "FromPort": "FfbHydRoll",
+      "ToNodeId": "cyclic_roll_include",
+      "ToPort": "hyd_loss"
+    },
+    {
+      "FromNodeId": "bus_recv_ffbapi_coll",
+      "FromPort": "FfbTrimColl",
+      "ToNodeId": "collective_include",
+      "ToPort": "api_trim"
+    },
+    {
+      "FromNodeId": "bus_recv_ffbapi_coll",
+      "FromPort": "FfbTrOnColl",
+      "ToNodeId": "collective_include",
+      "ToPort": "api_tr_on"
+    },
+    {
+      "FromNodeId": "bus_recv_ffbapi_coll",
+      "FromPort": "FfbHasTrimColl",
+      "ToNodeId": "collective_include",
+      "ToPort": "api_has_trim"
+    },
+    {
+      "FromNodeId": "bus_recv_ffbapi_coll",
+      "FromPort": "FfbHydColl",
+      "ToNodeId": "collective_include",
+      "ToPort": "hyd_loss"
+    },
+    {
+      "FromNodeId": "bus_recv_ffbapi_ped",
+      "FromPort": "FfbTrimPed",
+      "ToNodeId": "pedals_include",
+      "ToPort": "api_trim"
+    },
+    {
+      "FromNodeId": "bus_recv_ffbapi_ped",
+      "FromPort": "FfbTrOnPed",
+      "ToNodeId": "pedals_include",
+      "ToPort": "api_tr_on"
+    },
+    {
+      "FromNodeId": "bus_recv_ffbapi_ped",
+      "FromPort": "FfbHasTrimPed",
+      "ToNodeId": "pedals_include",
+      "ToPort": "api_has_trim"
+    },
+    {
+      "FromNodeId": "bus_recv_ffbapi_ped",
+      "FromPort": "FfbHydPed",
+      "ToNodeId": "pedals_include",
+      "ToPort": "hyd_loss"
+    },
+    {
+      "FromNodeId": "cyclic_pitch_include",
+      "FromPort": "fly_through",
+      "ToNodeId": "msfs_out_ft_pitch",
+      "ToPort": "MSFS.Out.FfbFlyThroughCyclicPitch"
+    },
+    {
+      "FromNodeId": "cyclic_roll_include",
+      "FromPort": "fly_through",
+      "ToNodeId": "msfs_out_ft_roll",
+      "ToPort": "MSFS.Out.FfbFlyThroughCyclicRoll"
+    },
+    {
+      "FromNodeId": "collective_include",
+      "FromPort": "fly_through",
+      "ToNodeId": "msfs_out_ft_coll",
+      "ToPort": "MSFS.Out.FfbFlyThroughCollective"
+    },
+    {
+      "FromNodeId": "pedals_include",
+      "FromPort": "fly_through",
+      "ToNodeId": "msfs_out_ft_ped",
+      "ToPort": "MSFS.Out.FfbFlyThroughPedals"
+    }
+  ],
+  "Params": [
+    {
+      "Name": "Cyclic.OWL",
+      "DefaultValue": 0.0,
+      "Min": 0.0,
+      "Max": 1.0,
+      "Ui": {
+        "Widget": "enum",
+        "Label": "One-Way Lock (Pitch)",
+        "Group": "Cyclic",
+        "Units": "",
+        "Step": null,
+        "Precision": null,
+        "LogScale": false,
+        "Options": [
+          {
+            "Value": "0",
+            "Label": "Off"
+          },
+          {
+            "Value": "1",
+            "Label": "On"
+          }
+        ]
+      }
+    },
+    {
+      "Name": "Aircraft.BladeCount",
+      "DefaultValue": 5.0,
+      "Min": 2.0,
+      "Max": 8.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Blade Count",
+        "Group": "Aircraft",
+        "Units": "",
+        "Step": 1.0,
+        "Precision": 0,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.RotationSign",
+      "DefaultValue": 1.0,
+      "Min": -1.0,
+      "Max": 1.0,
+      "Ui": {
+        "Widget": "enum",
+        "Label": "Rotor Direction",
+        "Group": "Aircraft",
+        "Units": "",
+        "Step": null,
+        "Precision": null,
+        "LogScale": false,
+        "Options": [
+          {
+            "Value": "1",
+            "Label": "CCW (US)"
+          },
+          {
+            "Value": "-1",
+            "Label": "CW (EU)"
+          }
+        ]
+      }
+    },
+    {
+      "Name": "Aircraft.TRBladeCount",
+      "DefaultValue": 2.0,
+      "Min": 2.0,
+      "Max": 6.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "TR Blade Count",
+        "Group": "Aircraft",
+        "Units": "",
+        "Step": 1.0,
+        "Precision": 0,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.TRGearRatio",
+      "DefaultValue": 4.62,
+      "Min": 1.0,
+      "Max": 10.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "TR Gear Ratio",
+        "Group": "Aircraft",
+        "Units": "",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.RotorDiameterM",
+      "DefaultValue": 8.05,
+      "Min": 5.0,
+      "Max": 25.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Rotor Diameter",
+        "Group": "Aircraft",
+        "Units": "m",
+        "Step": 0.05,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.KSpeedPitch",
+      "DefaultValue": 17.0,
+      "Min": 0.0,
+      "Max": 40.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Blade Alph Gain (Pitch)",
+        "Group": "Aircraft",
+        "Units": "",
+        "Step": 0.5,
+        "Precision": 1,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.KSpeedRoll",
+      "DefaultValue": 5.0,
+      "Min": 0.0,
+      "Max": 20.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Blade Alph Gain (Roll)",
+        "Group": "Aircraft",
+        "Units": "",
+        "Step": 0.5,
+        "Precision": 1,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.EtlSpeedKts",
+      "DefaultValue": 60.0,
+      "Min": 20.0,
+      "Max": 120.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "VRS Fade Speed",
+        "Group": "Aircraft",
+        "Units": "kt",
+        "Step": 1.0,
+        "Precision": 0,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.DescentMaxFpm",
+      "DefaultValue": 1500.0,
+      "Min": 500.0,
+      "Max": 5000.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "VRS Saturation Descent",
+        "Group": "Aircraft",
+        "Units": "fpm",
+        "Step": 50.0,
+        "Precision": 0,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.SlapOnsetKts",
+      "DefaultValue": 20.0,
+      "Min": 0.0,
+      "Max": 80.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Slap Onset Speed",
+        "Group": "Aircraft",
+        "Units": "kt",
+        "Step": 1.0,
+        "Precision": 0,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.KSlap",
+      "DefaultValue": 0.15,
+      "Min": 0.0,
+      "Max": 0.5,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Slap Gain",
+        "Group": "Aircraft",
+        "Units": "",
+        "Step": 0.005,
+        "Precision": 3,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.SlapMax",
+      "DefaultValue": 0.1,
+      "Min": 0.0,
+      "Max": 1.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Slap Cap",
+        "Group": "Aircraft",
+        "Units": "",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.EtlPeakKts",
+      "DefaultValue": 18.0,
+      "Min": 5.0,
+      "Max": 40.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "ETL Bump Peak",
+        "Group": "Aircraft",
+        "Units": "kt",
+        "Step": 0.5,
+        "Precision": 1,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.EtlWidthKts",
+      "DefaultValue": 6.0,
+      "Min": 2.0,
+      "Max": 20.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "ETL Bump Width",
+        "Group": "Aircraft",
+        "Units": "kt",
+        "Step": 0.5,
+        "Precision": 1,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.EtlBumpLoadGain",
+      "DefaultValue": 0.5,
+      "Min": 0.0,
+      "Max": 3.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "ETL Bump Load (Pitch)",
+        "Group": "Cyclic",
+        "Units": "N",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.EtlBumpLoadRollGain",
+      "DefaultValue": 0.4,
+      "Min": 0.0,
+      "Max": 3.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "ETL Bump Load (Roll)",
+        "Group": "Cyclic",
+        "Units": "N",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.VrsAttenGain",
+      "DefaultValue": 0.5,
+      "Min": 0.0,
+      "Max": 1.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "VRS Load Attenuation",
+        "Group": "Cyclic",
+        "Units": "",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.VrsTauUp",
+      "DefaultValue": 0.25,
+      "Min": 0.05,
+      "Max": 2.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "VRS Entry Tau",
+        "Group": "Aircraft",
+        "Units": "s",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.VrsTauDown",
+      "DefaultValue": 2.0,
+      "Min": 0.5,
+      "Max": 10.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "VRS Exit Tau",
+        "Group": "Aircraft",
+        "Units": "s",
+        "Step": 0.05,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.RbsMuCoupling",
+      "DefaultValue": 2.5,
+      "Min": 0.0,
+      "Max": 10.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "RBS Mu Coupling",
+        "Group": "Aircraft",
+        "Units": "",
+        "Step": 0.05,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.RbsThreshold",
+      "DefaultValue": 1.6,
+      "Min": 0.5,
+      "Max": 5.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "RBS Threshold",
+        "Group": "Aircraft",
+        "Units": "",
+        "Step": 0.05,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.RbsWidth",
+      "DefaultValue": 0.4,
+      "Min": 0.05,
+      "Max": 3.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "RBS Width",
+        "Group": "Aircraft",
+        "Units": "",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.RbsLoadPitchGain",
+      "DefaultValue": 1.2,
+      "Min": 0.0,
+      "Max": 5.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "RBS Load (Pitch)",
+        "Group": "Cyclic",
+        "Units": "N",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.RbsLoadRollGain",
+      "DefaultValue": 0.8,
+      "Min": 0.0,
+      "Max": 5.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "RBS Load (Roll)",
+        "Group": "Cyclic",
+        "Units": "N",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.VrsBuffetStart",
+      "DefaultValue": 0.2,
+      "Min": 0.0,
+      "Max": 1.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "VRS Buffet Onset",
+        "Group": "Aircraft",
+        "Units": "",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.VrsBuffetFull",
+      "DefaultValue": 0.8,
+      "Min": 0.0,
+      "Max": 1.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "VRS Buffet Saturation",
+        "Group": "Aircraft",
+        "Units": "",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.VrsBuffetGain",
+      "DefaultValue": 1.5,
+      "Min": 0.0,
+      "Max": 8.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "VRS Buffet (Cyclic)",
+        "Group": "Cyclic",
+        "Units": "N",
+        "Step": 0.05,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Collective.VrsBuffetGain",
+      "DefaultValue": 1.0,
+      "Min": 0.0,
+      "Max": 8.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "VRS Buffet (Collective)",
+        "Group": "Collective",
+        "Units": "N",
+        "Step": 0.05,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.Rotor.SpeedNom",
+      "DefaultValue": 400.0,
+      "Min": 100.0,
+      "Max": 1000.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Nominal Rotor Speed",
+        "Group": "Aircraft",
+        "Units": "RPM",
+        "Step": 1.0,
+        "Precision": 0,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.GLoadGain",
+      "DefaultValue": 1.0,
+      "Min": 0.0,
+      "Max": 5.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "G Load (Pitch)",
+        "Group": "Cyclic",
+        "Units": "N/G",
+        "Step": 0.05,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.GLoadRollGain",
+      "DefaultValue": 0.0,
+      "Min": 0.0,
+      "Max": 3.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "G Load (Roll, x mu)",
+        "Group": "Cyclic",
+        "Units": "N/G",
+        "Step": 0.05,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.MuBuzzOnset",
+      "DefaultValue": 0.32,
+      "Min": 0.2,
+      "Max": 0.5,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Mu Buzz Onset",
+        "Group": "Aircraft",
+        "Units": "",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.MuBuzzWidth",
+      "DefaultValue": 0.08,
+      "Min": 0.02,
+      "Max": 0.2,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Mu Buzz Width",
+        "Group": "Aircraft",
+        "Units": "",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.GndResGain",
+      "DefaultValue": 0.6,
+      "Min": 0.0,
+      "Max": 3.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Ground Shake Boost",
+        "Group": "Aircraft",
+        "Units": "",
+        "Step": 0.05,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.TouchdownGain",
+      "DefaultValue": 2.0,
+      "Min": 0.0,
+      "Max": 10.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Touchdown Thump",
+        "Group": "Aircraft",
+        "Units": "N",
+        "Step": 0.1,
+        "Precision": 1,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.FfbApiEnable",
+      "DefaultValue": 1.0,
+      "Min": 0.0,
+      "Max": 1.0,
+      "Ui": {
+        "Widget": "checkbox",
+        "Label": "FFB API: rig drives Cyclic",
+        "Group": "Cyclic",
+        "Units": "",
+        "Step": null,
+        "Precision": null,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "FlightStickCollective.FfbApiEnable",
+      "DefaultValue": 1.0,
+      "Min": 0.0,
+      "Max": 1.0,
+      "Ui": {
+        "Widget": "checkbox",
+        "Label": "FFB API: rig drives Collective",
+        "Group": "FlightStickCollective",
+        "Units": "",
+        "Step": null,
+        "Precision": null,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "FlightPedals.FfbApiEnable",
+      "DefaultValue": 1.0,
+      "Min": 0.0,
+      "Max": 1.0,
+      "Ui": {
+        "Widget": "checkbox",
+        "Label": "FFB API: rig drives Pedals",
+        "Group": "FlightPedals",
+        "Units": "",
+        "Step": null,
+        "Precision": null,
+        "LogScale": false,
+        "Options": []
+      }
+    }
+  ],
+  "ParamValues": null
+}

@@ -1,0 +1,790 @@
+{
+  "Version": 4,
+  "IsLibraryGraph": true,
+  "Nodes": [
+    {
+      "Id": "in_api",
+      "Title": "FFB API (SS3.4)",
+      "Kind": "Input",
+      "X": 40.0,
+      "Y": 60.0,
+      "Ports": [
+        {
+          "Name": "api_trim",
+          "Kind": "Output"
+        },
+        {
+          "Name": "api_tr_on",
+          "Kind": "Output"
+        },
+        {
+          "Name": "api_has_trim",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "in_axis",
+      "Title": "Axis",
+      "Kind": "Input",
+      "X": 40.0,
+      "Y": 260.0,
+      "Ports": [
+        {
+          "Name": "axis_force",
+          "Kind": "Output"
+        },
+        {
+          "Name": "axis_center",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "in_range",
+      "Title": "Travel Range",
+      "Kind": "Input",
+      "X": 40.0,
+      "Y": 400.0,
+      "Ports": [
+        {
+          "Name": "pos_min",
+          "Kind": "Output"
+        },
+        {
+          "Name": "pos_max",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "in_feel",
+      "Title": "Feel",
+      "Kind": "Input",
+      "X": 40.0,
+      "Y": 540.0,
+      "Ports": [
+        {
+          "Name": "base_spring",
+          "Kind": "Output"
+        },
+        {
+          "Name": "fallback_trim",
+          "Kind": "Output"
+        },
+        {
+          "Name": "trim_tau",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "in_ft",
+      "Title": "Fly-Through Thresholds",
+      "Kind": "Input",
+      "X": 40.0,
+      "Y": 760.0,
+      "Ports": [
+        {
+          "Name": "ft_on_force",
+          "Kind": "Output"
+        },
+        {
+          "Name": "ft_off_force",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "c_neg1",
+      "Title": "-1",
+      "Kind": "Const",
+      "X": 250.0,
+      "Y": 175.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": -1.0
+    },
+    {
+      "Id": "c_pos1",
+      "Title": "+1",
+      "Kind": "Const",
+      "X": 250.0,
+      "Y": 245.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 1.0
+    },
+    {
+      "Id": "norm_trim",
+      "Title": "trim -> mm",
+      "Kind": "Func",
+      "X": 460.0,
+      "Y": 60.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        },
+        {
+          "Name": "in",
+          "Kind": "Input"
+        },
+        {
+          "Name": "in_min",
+          "Kind": "Input"
+        },
+        {
+          "Name": "in_max",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out_min",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out_max",
+          "Kind": "Input"
+        }
+      ],
+      "Func": "normalize"
+    },
+    {
+      "Id": "sub_center",
+      "Title": "trim - centre",
+      "Kind": "Op",
+      "X": 700.0,
+      "Y": 60.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a-b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "sub"
+    },
+    {
+      "Id": "sel_trim",
+      "Title": "API trim or fallback",
+      "Kind": "Op",
+      "X": 900.0,
+      "Y": 60.0,
+      "Ports": [
+        {
+          "Name": "cond",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "cond?a:b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "select"
+    },
+    {
+      "Id": "lag_trim",
+      "Title": "trim smoothing",
+      "Kind": "Func",
+      "X": 1120.0,
+      "Y": 60.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        },
+        {
+          "Name": "input",
+          "Kind": "Input"
+        },
+        {
+          "Name": "tau_up_sec",
+          "Kind": "Input"
+        },
+        {
+          "Name": "tau_down_sec",
+          "Kind": "Input"
+        }
+      ],
+      "Func": "lag_asym"
+    },
+    {
+      "Id": "out_trim",
+      "Title": "Trim Offset",
+      "Kind": "Output",
+      "X": 1360.0,
+      "Y": 60.0,
+      "Ports": [
+        {
+          "Name": "trim_offset",
+          "Kind": "Input"
+        }
+      ]
+    },
+    {
+      "Id": "expr_drop",
+      "Title": "TR unclutched",
+      "Kind": "Expr",
+      "X": 460.0,
+      "Y": 380.0,
+      "Ports": [
+        {
+          "Name": "h",
+          "Kind": "Input"
+        },
+        {
+          "Name": "t",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "Expr": "(h > 0.5) && (t > 0.5)"
+    },
+    {
+      "Id": "c_zero_spring",
+      "Title": "0",
+      "Kind": "Const",
+      "X": 460.0,
+      "Y": 500.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 0.0
+    },
+    {
+      "Id": "sel_spring",
+      "Title": "spring off under TR",
+      "Kind": "Op",
+      "X": 700.0,
+      "Y": 380.0,
+      "Ports": [
+        {
+          "Name": "cond",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "cond?a:b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "select"
+    },
+    {
+      "Id": "out_spring",
+      "Title": "Spring Gain",
+      "Kind": "Output",
+      "X": 920.0,
+      "Y": 380.0,
+      "Ports": [
+        {
+          "Name": "spring_gain",
+          "Kind": "Input"
+        }
+      ]
+    },
+    {
+      "Id": "abs_force",
+      "Title": "|force|",
+      "Kind": "Op",
+      "X": 460.0,
+      "Y": 700.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "abs(a)",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "abs"
+    },
+    {
+      "Id": "gt_on",
+      "Title": "force > on",
+      "Kind": "Op",
+      "X": 680.0,
+      "Y": 700.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a>b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "gt"
+    },
+    {
+      "Id": "gt_off",
+      "Title": "force < off",
+      "Kind": "Op",
+      "X": 680.0,
+      "Y": 830.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a>b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "gt"
+    },
+    {
+      "Id": "c_off_tau",
+      "Title": "0.5 s",
+      "Kind": "Const",
+      "X": 680.0,
+      "Y": 960.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 0.5
+    },
+    {
+      "Id": "c_zero_tau",
+      "Title": "0",
+      "Kind": "Const",
+      "X": 680.0,
+      "Y": 1030.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 0.0
+    },
+    {
+      "Id": "lag_off",
+      "Title": "off dwell",
+      "Kind": "Func",
+      "X": 900.0,
+      "Y": 830.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        },
+        {
+          "Name": "input",
+          "Kind": "Input"
+        },
+        {
+          "Name": "tau_up_sec",
+          "Kind": "Input"
+        },
+        {
+          "Name": "tau_down_sec",
+          "Kind": "Input"
+        }
+      ],
+      "Func": "lag_asym"
+    },
+    {
+      "Id": "expr_off",
+      "Title": "off sustained",
+      "Kind": "Expr",
+      "X": 1120.0,
+      "Y": 830.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "Expr": "(a > 0.9)"
+    },
+    {
+      "Id": "latch_lock",
+      "Title": "lockout after TR",
+      "Kind": "Func",
+      "X": 1340.0,
+      "Y": 900.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        },
+        {
+          "Name": "set",
+          "Kind": "Input"
+        },
+        {
+          "Name": "reset",
+          "Kind": "Input"
+        }
+      ],
+      "Func": "rs_latch"
+    },
+    {
+      "Id": "expr_reset",
+      "Title": "lockout or off",
+      "Kind": "Expr",
+      "X": 1560.0,
+      "Y": 900.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "Expr": "a || b"
+    },
+    {
+      "Id": "expr_set",
+      "Title": "over force & has trim",
+      "Kind": "Expr",
+      "X": 1340.0,
+      "Y": 700.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "Expr": "a && (b > 0.5)"
+    },
+    {
+      "Id": "latch_ft",
+      "Title": "fly-through state",
+      "Kind": "Func",
+      "X": 1780.0,
+      "Y": 700.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        },
+        {
+          "Name": "set",
+          "Kind": "Input"
+        },
+        {
+          "Name": "reset",
+          "Kind": "Input"
+        }
+      ],
+      "Func": "rs_latch"
+    },
+    {
+      "Id": "out_ft",
+      "Title": "Fly-Through",
+      "Kind": "Output",
+      "X": 2000.0,
+      "Y": 700.0,
+      "Ports": [
+        {
+          "Name": "fly_through",
+          "Kind": "Input"
+        }
+      ]
+    }
+  ],
+  "Links": [
+    {
+      "FromNodeId": "in_api",
+      "FromPort": "api_trim",
+      "ToNodeId": "norm_trim",
+      "ToPort": "in"
+    },
+    {
+      "FromNodeId": "c_neg1",
+      "FromPort": "out",
+      "ToNodeId": "norm_trim",
+      "ToPort": "in_min"
+    },
+    {
+      "FromNodeId": "c_pos1",
+      "FromPort": "out",
+      "ToNodeId": "norm_trim",
+      "ToPort": "in_max"
+    },
+    {
+      "FromNodeId": "in_range",
+      "FromPort": "pos_min",
+      "ToNodeId": "norm_trim",
+      "ToPort": "out_min"
+    },
+    {
+      "FromNodeId": "in_range",
+      "FromPort": "pos_max",
+      "ToNodeId": "norm_trim",
+      "ToPort": "out_max"
+    },
+    {
+      "FromNodeId": "norm_trim",
+      "FromPort": "out",
+      "ToNodeId": "sub_center",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "in_axis",
+      "FromPort": "axis_center",
+      "ToNodeId": "sub_center",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "in_api",
+      "FromPort": "api_has_trim",
+      "ToNodeId": "sel_trim",
+      "ToPort": "cond"
+    },
+    {
+      "FromNodeId": "sub_center",
+      "FromPort": "a-b",
+      "ToNodeId": "sel_trim",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "in_feel",
+      "FromPort": "fallback_trim",
+      "ToNodeId": "sel_trim",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "sel_trim",
+      "FromPort": "cond?a:b",
+      "ToNodeId": "lag_trim",
+      "ToPort": "input"
+    },
+    {
+      "FromNodeId": "in_feel",
+      "FromPort": "trim_tau",
+      "ToNodeId": "lag_trim",
+      "ToPort": "tau_up_sec"
+    },
+    {
+      "FromNodeId": "in_feel",
+      "FromPort": "trim_tau",
+      "ToNodeId": "lag_trim",
+      "ToPort": "tau_down_sec"
+    },
+    {
+      "FromNodeId": "lag_trim",
+      "FromPort": "out",
+      "ToNodeId": "out_trim",
+      "ToPort": "trim_offset"
+    },
+    {
+      "FromNodeId": "in_api",
+      "FromPort": "api_has_trim",
+      "ToNodeId": "expr_drop",
+      "ToPort": "h"
+    },
+    {
+      "FromNodeId": "in_api",
+      "FromPort": "api_tr_on",
+      "ToNodeId": "expr_drop",
+      "ToPort": "t"
+    },
+    {
+      "FromNodeId": "expr_drop",
+      "FromPort": "out",
+      "ToNodeId": "sel_spring",
+      "ToPort": "cond"
+    },
+    {
+      "FromNodeId": "c_zero_spring",
+      "FromPort": "out",
+      "ToNodeId": "sel_spring",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "in_feel",
+      "FromPort": "base_spring",
+      "ToNodeId": "sel_spring",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "sel_spring",
+      "FromPort": "cond?a:b",
+      "ToNodeId": "out_spring",
+      "ToPort": "spring_gain"
+    },
+    {
+      "FromNodeId": "in_axis",
+      "FromPort": "axis_force",
+      "ToNodeId": "abs_force",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "abs_force",
+      "FromPort": "abs(a)",
+      "ToNodeId": "gt_on",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "in_ft",
+      "FromPort": "ft_on_force",
+      "ToNodeId": "gt_on",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "in_ft",
+      "FromPort": "ft_off_force",
+      "ToNodeId": "gt_off",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "abs_force",
+      "FromPort": "abs(a)",
+      "ToNodeId": "gt_off",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "gt_off",
+      "FromPort": "a>b",
+      "ToNodeId": "lag_off",
+      "ToPort": "input"
+    },
+    {
+      "FromNodeId": "c_off_tau",
+      "FromPort": "out",
+      "ToNodeId": "lag_off",
+      "ToPort": "tau_up_sec"
+    },
+    {
+      "FromNodeId": "c_zero_tau",
+      "FromPort": "out",
+      "ToNodeId": "lag_off",
+      "ToPort": "tau_down_sec"
+    },
+    {
+      "FromNodeId": "lag_off",
+      "FromPort": "out",
+      "ToNodeId": "expr_off",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "in_api",
+      "FromPort": "api_tr_on",
+      "ToNodeId": "latch_lock",
+      "ToPort": "set"
+    },
+    {
+      "FromNodeId": "expr_off",
+      "FromPort": "out",
+      "ToNodeId": "latch_lock",
+      "ToPort": "reset"
+    },
+    {
+      "FromNodeId": "latch_lock",
+      "FromPort": "out",
+      "ToNodeId": "expr_reset",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "expr_off",
+      "FromPort": "out",
+      "ToNodeId": "expr_reset",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "gt_on",
+      "FromPort": "a>b",
+      "ToNodeId": "expr_set",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "in_api",
+      "FromPort": "api_has_trim",
+      "ToNodeId": "expr_set",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "expr_set",
+      "FromPort": "out",
+      "ToNodeId": "latch_ft",
+      "ToPort": "set"
+    },
+    {
+      "FromNodeId": "expr_reset",
+      "FromPort": "out",
+      "ToNodeId": "latch_ft",
+      "ToPort": "reset"
+    },
+    {
+      "FromNodeId": "latch_ft",
+      "FromPort": "out",
+      "ToNodeId": "out_ft",
+      "ToPort": "fly_through"
+    }
+  ],
+  "Params": [],
+  "ParamValues": null
+}

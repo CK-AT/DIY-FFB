@@ -1,0 +1,1815 @@
+{
+  "Version": 4,
+  "IsLibraryGraph": true,
+  "Nodes": [
+    {
+      "Id": "in_precalc",
+      "Title": "Precalc Inputs",
+      "Kind": "Input",
+      "X": 30.0,
+      "Y": 250.0,
+      "Ports": [
+        {
+          "Name": "blade_alph",
+          "Kind": "Output"
+        },
+        {
+          "Name": "rpm_norm",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "in_owl",
+      "Title": "OWL",
+      "Kind": "Input",
+      "X": 920.0,
+      "Y": 70.0,
+      "Ports": [
+        {
+          "Name": "owl",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "in_axis_pos",
+      "Title": "Axis Pos",
+      "Kind": "Input",
+      "X": 90.0,
+      "Y": 1400.0,
+      "Ports": [
+        {
+          "Name": "axis_position",
+          "Kind": "Output"
+        },
+        {
+          "Name": "axis_center",
+          "Kind": "Output"
+        },
+        {
+          "Name": "axis_force",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "in_etl_bump",
+      "Title": "ETL Bump",
+      "Kind": "Input",
+      "X": 30.0,
+      "Y": 370.0,
+      "Ports": [
+        {
+          "Name": "etl_bump",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "in_etl_load_gain_eff",
+      "Title": "ETL Bump Load (eff)",
+      "Kind": "Input",
+      "X": 30.0,
+      "Y": 440.0,
+      "Ports": [
+        {
+          "Name": "etl_load_gain_eff",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "in_vrs",
+      "Title": "VRS",
+      "Kind": "Input",
+      "X": 40.0,
+      "Y": 810.0,
+      "Ports": [
+        {
+          "Name": "vrs",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "in_rbs",
+      "Title": "RBS",
+      "Kind": "Input",
+      "X": 30.0,
+      "Y": 520.0,
+      "Ports": [
+        {
+          "Name": "rbs",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "in_rbs_load_gain_eff",
+      "Title": "RBS Load (eff)",
+      "Kind": "Input",
+      "X": 30.0,
+      "Y": 580.0,
+      "Ports": [
+        {
+          "Name": "rbs_load_gain_eff",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "mul_rbs_load",
+      "Title": "rbs × gain × rpm",
+      "Kind": "Op",
+      "X": 280.0,
+      "Y": 520.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "c",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b*c",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "param_vrs_buffet_start",
+      "Kind": "Param",
+      "X": 480.0,
+      "Y": 880.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "VrsBuffetStart"
+        }
+      ],
+      "SignalGroup": "Aircraft"
+    },
+    {
+      "Id": "param_vrs_buffet_full",
+      "Kind": "Param",
+      "X": 480.0,
+      "Y": 950.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "VrsBuffetFull"
+        }
+      ],
+      "SignalGroup": "Aircraft"
+    },
+    {
+      "Id": "param_vrs_buffet_gain",
+      "Kind": "Param",
+      "X": 480.0,
+      "Y": 1020.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "VrsBuffetGain"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "vrs_buffet",
+      "Title": "VRS buffet env",
+      "Kind": "Func",
+      "X": 810.0,
+      "Y": 840.0,
+      "Ports": [
+        {
+          "Name": "alpha",
+          "Kind": "Input"
+        },
+        {
+          "Name": "start",
+          "Kind": "Input"
+        },
+        {
+          "Name": "full",
+          "Kind": "Input"
+        },
+        {
+          "Name": "gain",
+          "Kind": "Input"
+        },
+        {
+          "Name": "qhat_eff",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "Func": "buffet"
+    },
+    {
+      "Id": "param_vrs_atten_gain",
+      "Kind": "Param",
+      "X": 200.0,
+      "Y": 1020.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "VrsAttenGain"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "const_vrs_one",
+      "Title": "1.0",
+      "Kind": "Const",
+      "X": 610.0,
+      "Y": 1090.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 1.0
+    },
+    {
+      "Id": "const_vrs_zero",
+      "Title": "0.0",
+      "Kind": "Const",
+      "X": 80.0,
+      "Y": 890.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 0.0
+    },
+    {
+      "Id": "clamp_vrs_eff",
+      "Title": "clamp 0..1",
+      "Kind": "Op",
+      "X": 290.0,
+      "Y": 810.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "min",
+          "Kind": "Input"
+        },
+        {
+          "Name": "max",
+          "Kind": "Input"
+        },
+        {
+          "Name": "clamp(a,min,max)",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "clamp"
+    },
+    {
+      "Id": "mul_atten_amt",
+      "Title": "VrsAtten × vrs_eff",
+      "Kind": "Op",
+      "X": 490.0,
+      "Y": 720.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "sub_atten_factor",
+      "Title": "1 - atten_amt",
+      "Kind": "Op",
+      "X": 650.0,
+      "Y": 600.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a-b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "sub"
+    },
+    {
+      "Id": "mul_load_atten",
+      "Title": "Load × atten",
+      "Kind": "Op",
+      "X": 790.0,
+      "Y": 230.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "mul_etl_load",
+      "Title": "etl × gain × rpm",
+      "Kind": "Op",
+      "X": 280.0,
+      "Y": 370.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "c",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b*c",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "add_total_load",
+      "Title": "Load + ETL + RBS",
+      "Kind": "Op",
+      "X": 620.0,
+      "Y": 230.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a+b+c+d",
+          "Kind": "Output"
+        },
+        {
+          "Name": "c",
+          "Kind": "Input"
+        },
+        {
+          "Name": "d",
+          "Kind": "Input"
+        }
+      ],
+      "Op": "add"
+    },
+    {
+      "Id": "param_k_spring",
+      "Kind": "Param",
+      "X": 90.0,
+      "Y": 1570.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "SpringGain"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "param_k_damper",
+      "Kind": "Param",
+      "X": 1100.0,
+      "Y": 730.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "DamperGain"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "param_k_friction",
+      "Kind": "Param",
+      "X": 1100.0,
+      "Y": 110.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "Friction"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "param_k_load",
+      "Kind": "Param",
+      "X": 30.0,
+      "Y": 170.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "LoadGain"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "load",
+      "Title": "Load",
+      "Kind": "Op",
+      "X": 280.0,
+      "Y": 220.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input",
+          "Negate": true
+        },
+        {
+          "Name": "a*-b*c",
+          "Kind": "Output"
+        },
+        {
+          "Name": "c",
+          "Kind": "Input"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "owl_clamp",
+      "Title": "OWL Clamp",
+      "Kind": "Op",
+      "X": 910.0,
+      "Y": 140.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "min(a,b)",
+          "Kind": "Output"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        }
+      ],
+      "Op": "min"
+    },
+    {
+      "Id": "select_owl",
+      "Title": "OWL",
+      "Kind": "Op",
+      "X": 1100.0,
+      "Y": 190.0,
+      "Ports": [
+        {
+          "Name": "cond",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "cond?a:b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "select"
+    },
+    {
+      "Id": "out_scoped",
+      "Kind": "Output",
+      "X": 1420.0,
+      "Y": 270.0,
+      "Ports": [
+        {
+          "Kind": "Input",
+          "SignalSuffix": "Friction"
+        },
+        {
+          "Kind": "Input",
+          "SignalSuffix": "LoadForce"
+        },
+        {
+          "Kind": "Input",
+          "SignalSuffix": "BuffetAmplitude"
+        }
+      ],
+      "Scoped": true
+    },
+    {
+      "Id": "aa16294c52b74d6584a397027d88f23f",
+      "Kind": "Output",
+      "X": 790.0,
+      "Y": 2150.0,
+      "Ports": [
+        {
+          "Kind": "Input",
+          "SignalSuffix": "SpringGain"
+        }
+      ],
+      "Scoped": true
+    },
+    {
+      "Id": "in_g_load",
+      "Title": "G Load (G-1)",
+      "Kind": "Input",
+      "X": 30.0,
+      "Y": 660.0,
+      "Ports": [
+        {
+          "Name": "g_load",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "in_g_load_gain",
+      "Title": "G Load Gain (eff)",
+      "Kind": "Input",
+      "X": 30.0,
+      "Y": 730.0,
+      "Ports": [
+        {
+          "Name": "g_load_gain_eff",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "mul_g_load",
+      "Title": "g x gain x rpm",
+      "Kind": "Op",
+      "X": 280.0,
+      "Y": 680.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "c",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b*c",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "in_thump",
+      "Title": "Ground Buffet",
+      "Kind": "Input",
+      "X": 830.0,
+      "Y": 1020.0,
+      "Ports": [
+        {
+          "Name": "gnd_buffet",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "add_buffet_total",
+      "Title": "buffet + thump",
+      "Kind": "Op",
+      "X": 1090.0,
+      "Y": 910.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a+b+c",
+          "Kind": "Output"
+        },
+        {
+          "Name": "c",
+          "Kind": "Input"
+        }
+      ],
+      "Op": "add"
+    },
+    {
+      "Id": "in_turb",
+      "Title": "Turbulence (|G hp|)",
+      "Kind": "Input",
+      "X": 770.0,
+      "Y": 1100.0,
+      "Ports": [
+        {
+          "Name": "turb",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "param_turb_gain",
+      "Kind": "Param",
+      "X": 660.0,
+      "Y": 1180.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "TurbBuffetGain"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "mul_turb_buffet",
+      "Title": "turb x gain",
+      "Kind": "Op",
+      "X": 930.0,
+      "Y": 1100.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "4d524584c0214589931c3676da1ebfc3",
+      "Title": "0.0",
+      "Kind": "Const",
+      "X": 770.0,
+      "Y": 130.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 0.0
+    },
+    {
+      "Id": "9b4c13e8cc2b4f9eb049424be56c0ce3",
+      "Title": "1.0",
+      "Kind": "Const",
+      "X": 80.0,
+      "Y": 960.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 1.0
+    },
+    {
+      "Id": "b10b07dc401e4c4c85768c9922f1cdd8",
+      "Title": "1.0",
+      "Kind": "Const",
+      "X": 490.0,
+      "Y": 610.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 1.0
+    },
+    {
+      "Id": "39288d8b8b314c0ea331cad5e42bbb9e",
+      "Title": "ConfigIn",
+      "Kind": "ConfigIn",
+      "X": 110.0,
+      "Y": 1890.0,
+      "Ports": [
+        {
+          "Name": "FlightControl.PosMax",
+          "Kind": "Output",
+          "ConfigField": "FlightControl.PosMax"
+        },
+        {
+          "Name": "FlightControl.PosMin",
+          "Kind": "Output",
+          "ConfigField": "FlightControl.PosMin"
+        }
+      ],
+      "Scoped": true
+    },
+    {
+      "Id": "fcf23f2d29f34df7b32e45741796dec7",
+      "Title": "Output",
+      "Kind": "Output",
+      "X": 990.0,
+      "Y": 1700.0,
+      "Ports": [
+        {
+          "Name": "pos_virt",
+          "Kind": "Input"
+        }
+      ]
+    },
+    {
+      "Id": "9715619757ec40ab9c419b4d27cf560b",
+      "Title": "pos_norm",
+      "Kind": "Func",
+      "X": 730.0,
+      "Y": 1700.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        },
+        {
+          "Name": "in",
+          "Kind": "Input"
+        },
+        {
+          "Name": "in_min",
+          "Kind": "Input"
+        },
+        {
+          "Name": "in_max",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out_min",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out_max",
+          "Kind": "Input"
+        }
+      ],
+      "Func": "normalize"
+    },
+    {
+      "Id": "e9edffb9526f46159c9848288038ffab",
+      "Title": "-1",
+      "Kind": "Const",
+      "X": 570.0,
+      "Y": 1810.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": -1.0
+    },
+    {
+      "Id": "0fe50c9a319849aa86cc30ef50059dd8",
+      "Title": "1",
+      "Kind": "Const",
+      "X": 570.0,
+      "Y": 1890.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 1.0
+    },
+    {
+      "Id": "869b7e893ded4a3fa0ff781568a00305",
+      "Kind": "Output",
+      "X": 1520.0,
+      "Y": 660.0,
+      "Ports": [
+        {
+          "Kind": "Input",
+          "SignalSuffix": "DamperGain"
+        }
+      ],
+      "Scoped": true
+    },
+    {
+      "Id": "4121b424503e4f39bbf85d1edbaeee65",
+      "Kind": "Param",
+      "X": 90.0,
+      "Y": 2450.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "TrimDamperTC"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "75ba4088548a47ba90df0c8e8305c589",
+      "Kind": "Output",
+      "X": 790.0,
+      "Y": 2050.0,
+      "Ports": [
+        {
+          "Kind": "Input",
+          "SignalSuffix": "TrimOffset"
+        }
+      ],
+      "Scoped": true
+    },
+    {
+      "Id": "63f373e0e2394cdf9c94145c018dbb6e",
+      "Title": "Output",
+      "Kind": "Output",
+      "X": 790.0,
+      "Y": 2250.0,
+      "Ports": [
+        {
+          "Name": "fly_through",
+          "Kind": "Input"
+        }
+      ]
+    },
+    {
+      "Id": "in_ffb_api",
+      "Title": "FFB API",
+      "Kind": "Input",
+      "X": 90.0,
+      "Y": 2050.0,
+      "Ports": [
+        {
+          "Name": "api_trim",
+          "Kind": "Output"
+        },
+        {
+          "Name": "api_tr_on",
+          "Kind": "Output"
+        },
+        {
+          "Name": "api_has_trim",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "const_no_trim_anchor",
+      "Title": "0 (no trim: centre)",
+      "Kind": "Const",
+      "X": 90.0,
+      "Y": 2230.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 0.0
+    },
+    {
+      "Id": "param_ft_on",
+      "Title": "",
+      "Kind": "Param",
+      "X": 90.0,
+      "Y": 2310.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlyThroughOnForce"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "param_ft_off",
+      "Title": "",
+      "Kind": "Param",
+      "X": 90.0,
+      "Y": 2380.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlyThroughOffForce"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "ffb_api_trim_include",
+      "Title": "FFB API Trim",
+      "Kind": "Include",
+      "X": 430.0,
+      "Y": 2050.0,
+      "IncludePath": "ffb_api_trim.json",
+      "InputPortOrder": [
+        "api_trim",
+        "api_tr_on",
+        "api_has_trim",
+        "axis_force",
+        "axis_center",
+        "pos_min",
+        "pos_max",
+        "base_spring",
+        "fallback_trim",
+        "trim_tau",
+        "ft_on_force",
+        "ft_off_force"
+      ]
+    },
+    {
+      "Id": "in_hyd",
+      "Title": "Hydraulics",
+      "Kind": "Input",
+      "X": 900.0,
+      "Y": 380.0,
+      "Ports": [
+        {
+          "Name": "hyd_loss",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "param_hyd_friction",
+      "Title": "",
+      "Kind": "Param",
+      "X": 900.0,
+      "Y": 460.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "HydFrictionAdd"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "param_hyd_damper",
+      "Title": "",
+      "Kind": "Param",
+      "X": 900.0,
+      "Y": 560.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "HydDamperAdd"
+        }
+      ],
+      "SignalGroup": "Cyclic"
+    },
+    {
+      "Id": "mul_hyd_friction",
+      "Title": "loss x add",
+      "Kind": "Op",
+      "X": 1130.0,
+      "Y": 400.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "add_friction_eff",
+      "Title": "friction + hyd",
+      "Kind": "Op",
+      "X": 1300.0,
+      "Y": 180.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a+b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "add"
+    },
+    {
+      "Id": "mul_hyd_damper",
+      "Title": "loss x add",
+      "Kind": "Op",
+      "X": 1130.0,
+      "Y": 540.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "add_damper_eff",
+      "Title": "damper + hyd",
+      "Kind": "Op",
+      "X": 1300.0,
+      "Y": 660.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a+b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "add"
+    }
+  ],
+  "Links": [
+    {
+      "FromNodeId": "in_precalc",
+      "FromPort": "blade_alph",
+      "ToNodeId": "load",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "in_owl",
+      "FromPort": "owl",
+      "ToNodeId": "select_owl",
+      "ToPort": "cond"
+    },
+    {
+      "FromNodeId": "owl_clamp",
+      "FromPort": "min(a,b)",
+      "ToNodeId": "select_owl",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "select_owl",
+      "FromPort": "cond?a:b",
+      "ToNodeId": "out_scoped",
+      "ToPort": "LoadForce"
+    },
+    {
+      "FromNodeId": "param_k_load",
+      "FromPort": "LoadGain",
+      "ToNodeId": "load",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "in_precalc",
+      "FromPort": "rpm_norm",
+      "ToNodeId": "load",
+      "ToPort": "c"
+    },
+    {
+      "FromNodeId": "in_etl_bump",
+      "FromPort": "etl_bump",
+      "ToNodeId": "mul_etl_load",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "in_etl_load_gain_eff",
+      "FromPort": "etl_load_gain_eff",
+      "ToNodeId": "mul_etl_load",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "in_precalc",
+      "FromPort": "rpm_norm",
+      "ToNodeId": "mul_etl_load",
+      "ToPort": "c"
+    },
+    {
+      "FromNodeId": "const_vrs_zero",
+      "FromPort": "out",
+      "ToNodeId": "clamp_vrs_eff",
+      "ToPort": "min"
+    },
+    {
+      "FromNodeId": "param_vrs_atten_gain",
+      "FromPort": "VrsAttenGain",
+      "ToNodeId": "mul_atten_amt",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "mul_atten_amt",
+      "FromPort": "a*b",
+      "ToNodeId": "sub_atten_factor",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "sub_atten_factor",
+      "FromPort": "a-b",
+      "ToNodeId": "mul_load_atten",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "in_rbs",
+      "FromPort": "rbs",
+      "ToNodeId": "mul_rbs_load",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "in_rbs_load_gain_eff",
+      "FromPort": "rbs_load_gain_eff",
+      "ToNodeId": "mul_rbs_load",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "in_precalc",
+      "FromPort": "rpm_norm",
+      "ToNodeId": "mul_rbs_load",
+      "ToPort": "c"
+    },
+    {
+      "FromNodeId": "mul_rbs_load",
+      "FromPort": "a*b*c",
+      "ToNodeId": "add_total_load",
+      "ToPort": "c"
+    },
+    {
+      "FromNodeId": "clamp_vrs_eff",
+      "FromPort": "clamp(a,min,max)",
+      "ToNodeId": "vrs_buffet",
+      "ToPort": "alpha"
+    },
+    {
+      "FromNodeId": "param_vrs_buffet_start",
+      "FromPort": "VrsBuffetStart",
+      "ToNodeId": "vrs_buffet",
+      "ToPort": "start"
+    },
+    {
+      "FromNodeId": "param_vrs_buffet_full",
+      "FromPort": "VrsBuffetFull",
+      "ToNodeId": "vrs_buffet",
+      "ToPort": "full"
+    },
+    {
+      "FromNodeId": "param_vrs_buffet_gain",
+      "FromPort": "VrsBuffetGain",
+      "ToNodeId": "vrs_buffet",
+      "ToPort": "gain"
+    },
+    {
+      "FromNodeId": "const_vrs_one",
+      "FromPort": "out",
+      "ToNodeId": "vrs_buffet",
+      "ToPort": "qhat_eff"
+    },
+    {
+      "FromNodeId": "add_buffet_total",
+      "FromPort": "a+b+c",
+      "ToNodeId": "out_scoped",
+      "ToPort": "BuffetAmplitude"
+    },
+    {
+      "FromNodeId": "mul_etl_load",
+      "FromPort": "a*b*c",
+      "ToNodeId": "add_total_load",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "mul_load_atten",
+      "FromPort": "a*b",
+      "ToNodeId": "owl_clamp",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "mul_load_atten",
+      "FromPort": "a*b",
+      "ToNodeId": "select_owl",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "in_vrs",
+      "FromPort": "vrs",
+      "ToNodeId": "clamp_vrs_eff",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "load",
+      "FromPort": "a*-b*c",
+      "ToNodeId": "add_total_load",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "add_total_load",
+      "FromPort": "a+b+c+d",
+      "ToNodeId": "mul_load_atten",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "in_g_load",
+      "FromPort": "g_load",
+      "ToNodeId": "mul_g_load",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "in_g_load_gain",
+      "FromPort": "g_load_gain_eff",
+      "ToNodeId": "mul_g_load",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "in_precalc",
+      "FromPort": "rpm_norm",
+      "ToNodeId": "mul_g_load",
+      "ToPort": "c"
+    },
+    {
+      "FromNodeId": "mul_g_load",
+      "FromPort": "a*b*c",
+      "ToNodeId": "add_total_load",
+      "ToPort": "d"
+    },
+    {
+      "FromNodeId": "vrs_buffet",
+      "FromPort": "out",
+      "ToNodeId": "add_buffet_total",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "in_thump",
+      "FromPort": "gnd_buffet",
+      "ToNodeId": "add_buffet_total",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "in_turb",
+      "FromPort": "turb",
+      "ToNodeId": "mul_turb_buffet",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "param_turb_gain",
+      "FromPort": "TurbBuffetGain",
+      "ToNodeId": "mul_turb_buffet",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "mul_turb_buffet",
+      "FromPort": "a*b",
+      "ToNodeId": "add_buffet_total",
+      "ToPort": "c"
+    },
+    {
+      "FromNodeId": "4d524584c0214589931c3676da1ebfc3",
+      "FromPort": "out",
+      "ToNodeId": "owl_clamp",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "9b4c13e8cc2b4f9eb049424be56c0ce3",
+      "FromPort": "out",
+      "ToNodeId": "clamp_vrs_eff",
+      "ToPort": "max"
+    },
+    {
+      "FromNodeId": "b10b07dc401e4c4c85768c9922f1cdd8",
+      "FromPort": "out",
+      "ToNodeId": "sub_atten_factor",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "clamp_vrs_eff",
+      "FromPort": "clamp(a,min,max)",
+      "ToNodeId": "mul_atten_amt",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "e9edffb9526f46159c9848288038ffab",
+      "FromPort": "out",
+      "ToNodeId": "9715619757ec40ab9c419b4d27cf560b",
+      "ToPort": "out_min"
+    },
+    {
+      "FromNodeId": "0fe50c9a319849aa86cc30ef50059dd8",
+      "FromPort": "out",
+      "ToNodeId": "9715619757ec40ab9c419b4d27cf560b",
+      "ToPort": "out_max"
+    },
+    {
+      "FromNodeId": "39288d8b8b314c0ea331cad5e42bbb9e",
+      "FromPort": "FlightControl.PosMax",
+      "ToNodeId": "9715619757ec40ab9c419b4d27cf560b",
+      "ToPort": "in_max"
+    },
+    {
+      "FromNodeId": "39288d8b8b314c0ea331cad5e42bbb9e",
+      "FromPort": "FlightControl.PosMin",
+      "ToNodeId": "9715619757ec40ab9c419b4d27cf560b",
+      "ToPort": "in_min"
+    },
+    {
+      "FromNodeId": "in_axis_pos",
+      "FromPort": "axis_position",
+      "ToNodeId": "9715619757ec40ab9c419b4d27cf560b",
+      "ToPort": "in"
+    },
+    {
+      "FromNodeId": "9715619757ec40ab9c419b4d27cf560b",
+      "FromPort": "out",
+      "ToNodeId": "fcf23f2d29f34df7b32e45741796dec7",
+      "ToPort": "pos_virt"
+    },
+    {
+      "FromNodeId": "in_ffb_api",
+      "FromPort": "api_trim",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "api_trim"
+    },
+    {
+      "FromNodeId": "in_ffb_api",
+      "FromPort": "api_tr_on",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "api_tr_on"
+    },
+    {
+      "FromNodeId": "in_ffb_api",
+      "FromPort": "api_has_trim",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "api_has_trim"
+    },
+    {
+      "FromNodeId": "in_axis_pos",
+      "FromPort": "axis_force",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "axis_force"
+    },
+    {
+      "FromNodeId": "in_axis_pos",
+      "FromPort": "axis_center",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "axis_center"
+    },
+    {
+      "FromNodeId": "39288d8b8b314c0ea331cad5e42bbb9e",
+      "FromPort": "FlightControl.PosMin",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "pos_min"
+    },
+    {
+      "FromNodeId": "39288d8b8b314c0ea331cad5e42bbb9e",
+      "FromPort": "FlightControl.PosMax",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "pos_max"
+    },
+    {
+      "FromNodeId": "param_k_spring",
+      "FromPort": "SpringGain",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "base_spring"
+    },
+    {
+      "FromNodeId": "const_no_trim_anchor",
+      "FromPort": "out",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "fallback_trim"
+    },
+    {
+      "FromNodeId": "4121b424503e4f39bbf85d1edbaeee65",
+      "FromPort": "TrimDamperTC",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "trim_tau"
+    },
+    {
+      "FromNodeId": "param_ft_on",
+      "FromPort": "FlyThroughOnForce",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "ft_on_force"
+    },
+    {
+      "FromNodeId": "param_ft_off",
+      "FromPort": "FlyThroughOffForce",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "ft_off_force"
+    },
+    {
+      "FromNodeId": "ffb_api_trim_include",
+      "FromPort": "trim_offset",
+      "ToNodeId": "75ba4088548a47ba90df0c8e8305c589",
+      "ToPort": "TrimOffset"
+    },
+    {
+      "FromNodeId": "ffb_api_trim_include",
+      "FromPort": "spring_gain",
+      "ToNodeId": "aa16294c52b74d6584a397027d88f23f",
+      "ToPort": "SpringGain"
+    },
+    {
+      "FromNodeId": "ffb_api_trim_include",
+      "FromPort": "fly_through",
+      "ToNodeId": "63f373e0e2394cdf9c94145c018dbb6e",
+      "ToPort": "fly_through"
+    },
+    {
+      "FromNodeId": "in_hyd",
+      "FromPort": "hyd_loss",
+      "ToNodeId": "mul_hyd_friction",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "param_hyd_friction",
+      "FromPort": "HydFrictionAdd",
+      "ToNodeId": "mul_hyd_friction",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "param_k_friction",
+      "FromPort": "Friction",
+      "ToNodeId": "add_friction_eff",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "mul_hyd_friction",
+      "FromPort": "a*b",
+      "ToNodeId": "add_friction_eff",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "in_hyd",
+      "FromPort": "hyd_loss",
+      "ToNodeId": "mul_hyd_damper",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "param_hyd_damper",
+      "FromPort": "HydDamperAdd",
+      "ToNodeId": "mul_hyd_damper",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "param_k_damper",
+      "FromPort": "DamperGain",
+      "ToNodeId": "add_damper_eff",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "mul_hyd_damper",
+      "FromPort": "a*b",
+      "ToNodeId": "add_damper_eff",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "add_damper_eff",
+      "FromPort": "a+b",
+      "ToNodeId": "869b7e893ded4a3fa0ff781568a00305",
+      "ToPort": "DamperGain"
+    },
+    {
+      "FromNodeId": "add_friction_eff",
+      "FromPort": "a+b",
+      "ToNodeId": "out_scoped",
+      "ToPort": "Friction"
+    }
+  ],
+  "Params": [
+    {
+      "Name": "Cyclic.SpringGain",
+      "DefaultValue": 1.19,
+      "Min": 0.0,
+      "Max": 5.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Spring Gain",
+        "Group": "Cyclic",
+        "Units": "N/mm",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.DamperGain",
+      "DefaultValue": 0.5,
+      "Min": 0.0,
+      "Max": 5.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Damper Gain",
+        "Group": "Cyclic",
+        "Units": "N*s/mm",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.Friction",
+      "DefaultValue": 0.1,
+      "Min": 0.0,
+      "Max": 2.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Friction",
+        "Group": "Cyclic",
+        "Units": "N",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.LoadGain",
+      "DefaultValue": 0.2,
+      "Min": 0.0,
+      "Max": 5.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Flapping Load Gain",
+        "Group": "Cyclic",
+        "Units": "N/deg",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.TrimStep",
+      "DefaultValue": 5.0,
+      "Min": 0.1,
+      "Max": 50.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Trim Rate",
+        "Group": "Cyclic",
+        "Units": "mm/s",
+        "Step": 0.1,
+        "Precision": 1,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.TrimMin",
+      "DefaultValue": -20.0,
+      "Min": -50.0,
+      "Max": 0.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Hat Trim Min",
+        "Group": "Cyclic",
+        "Units": "mm",
+        "Step": 0.5,
+        "Precision": 1,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.TrimMax",
+      "DefaultValue": 20.0,
+      "Min": 0.0,
+      "Max": 50.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Hat Trim Max",
+        "Group": "Cyclic",
+        "Units": "mm",
+        "Step": 0.5,
+        "Precision": 1,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.VrsBuffetGain",
+      "DefaultValue": 1.5,
+      "Min": 0.0,
+      "Max": 100.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "VRS Buffet Gain",
+        "Group": "Cyclic",
+        "Units": "N",
+        "Step": 0.05,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.VrsBuffetStart",
+      "DefaultValue": 0.0,
+      "Min": 0.0,
+      "Max": 1.0,
+      "Ui": null
+    },
+    {
+      "Name": "Aircraft.VrsBuffetFull",
+      "DefaultValue": 0.0,
+      "Min": 0.0,
+      "Max": 1.0,
+      "Ui": null
+    },
+    {
+      "Name": "Cyclic.VrsAttenGain",
+      "DefaultValue": 0.0,
+      "Min": 0.0,
+      "Max": 1.0,
+      "Ui": {
+        "Widget": "",
+        "Label": "",
+        "Group": "",
+        "Units": "",
+        "Step": null,
+        "Precision": null,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.TurbBuffetGain",
+      "DefaultValue": 1.0,
+      "Min": 0.0,
+      "Max": 10.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Turbulence Buffet",
+        "Group": "Cyclic",
+        "Units": "N/G",
+        "Step": 0.1,
+        "Precision": 1,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.TrimDamperTC",
+      "DefaultValue": 5.1000000000000005,
+      "Min": 0.0,
+      "Max": 10.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Trim Damper Time Constant",
+        "Group": "Cyclic",
+        "Units": "s",
+        "Step": 0.1,
+        "Precision": 1,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.FlyThroughOnForce",
+      "DefaultValue": 4.0,
+      "Min": 0.5,
+      "Max": 30.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Fly-Through On Force",
+        "Group": "Cyclic",
+        "Units": "N",
+        "Step": 0.1,
+        "Precision": 1,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.FlyThroughOffForce",
+      "DefaultValue": 2.0,
+      "Min": 0.0,
+      "Max": 30.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Fly-Through Off Force",
+        "Group": "Cyclic",
+        "Units": "N",
+        "Step": 0.1,
+        "Precision": 1,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.HydFrictionAdd",
+      "DefaultValue": 0.0,
+      "Min": 0.0,
+      "Max": 20.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Hyd Loss Friction",
+        "Group": "Cyclic",
+        "Units": "N",
+        "Step": 0.1,
+        "Precision": 1,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Cyclic.HydDamperAdd",
+      "DefaultValue": 0.0,
+      "Min": 0.0,
+      "Max": 10.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Hyd Loss Damping",
+        "Group": "Cyclic",
+        "Units": "N*s/mm",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    }
+  ],
+  "ParamValues": null
+}

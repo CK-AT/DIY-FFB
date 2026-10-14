@@ -40,6 +40,19 @@ namespace DiyFfb.GraphEditor
             },
             new GraphTemplateEntry
             {
+                Name = "Helicopter \u2014 FFB API (MSFS)",
+                Description = "Helicopter for MSFS aircraft that implement the FFB LVAR API (Standards/MSFS_Helicopter_FFB_API.md). Same feel model as the Unboosted (MSFS) variant, but trim, trim-release and hydraulic assist come from the aircraft over L:FFB_* instead of being inferred; fly-through is reported back per axis. On an aircraft that does not implement the API every read is 0, which reads as \"no trim system, full boost\" \u2014 use the Unboosted (MSFS) template there instead, since this one still writes L:FFB_*_ENABLED.",
+                Category = "Flight",
+                TemplatePath = "graphs/templates/heli_ffbapi_msfs.json",
+                GameIds = new[] {
+                    "MSFS2020", "MSFS2024",
+                    "FlightSimulator", "FlightSimulator2020", "FlightSimulator2024",
+                    "MicrosoftFlightSimulator", "MicrosoftFlightSimulator2020", "MicrosoftFlightSimulator2024",
+                    "MSFS", "MSFS20", "MSFS24"
+                }
+            },
+            new GraphTemplateEntry
+            {
                 Name = "Helicopter \u2014 Boosted",
                 Description = "Boosted helicopter (Bell 206, H125). No load force, hydraulic friction/damping model.",
                 Category = "Flight",

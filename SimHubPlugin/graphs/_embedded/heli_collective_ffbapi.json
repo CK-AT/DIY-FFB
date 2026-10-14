@@ -1,0 +1,1431 @@
+{
+  "Version": 4,
+  "IsLibraryGraph": true,
+  "Nodes": [
+    {
+      "Id": "in_precalc",
+      "Title": "Precalc Inputs",
+      "Kind": "Input",
+      "X": 30.0,
+      "Y": 210.0,
+      "Ports": [
+        {
+          "Name": "torque_norm",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "param_k_damper",
+      "Kind": "Param",
+      "X": 30.0,
+      "Y": 60.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "DamperGain"
+        }
+      ],
+      "SignalGroup": "FlightStickCollective"
+    },
+    {
+      "Id": "param_k_friction",
+      "Kind": "Param",
+      "X": 30.0,
+      "Y": 130.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "Friction"
+        }
+      ],
+      "SignalGroup": "FlightStickCollective"
+    },
+    {
+      "Id": "param_k_load",
+      "Kind": "Param",
+      "X": 30.0,
+      "Y": 290.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "LoadGain"
+        }
+      ],
+      "SignalGroup": "FlightStickCollective"
+    },
+    {
+      "Id": "load",
+      "Title": "Load",
+      "Kind": "Op",
+      "X": 410.0,
+      "Y": 220.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input",
+          "Negate": true
+        },
+        {
+          "Name": "a*-b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "out_scoped",
+      "Kind": "Output",
+      "X": 1780.0,
+      "Y": 200.0,
+      "Ports": [
+        {
+          "Kind": "Input",
+          "SignalSuffix": "DamperGain"
+        },
+        {
+          "Kind": "Input",
+          "SignalSuffix": "Friction"
+        },
+        {
+          "Kind": "Input",
+          "SignalSuffix": "LoadForce"
+        },
+        {
+          "Kind": "Input",
+          "SignalSuffix": "BuffetAmplitude"
+        }
+      ],
+      "Scoped": true
+    },
+    {
+      "Id": "in_vrs",
+      "Title": "VRS",
+      "Kind": "Input",
+      "X": 30.0,
+      "Y": 450.0,
+      "Ports": [
+        {
+          "Name": "vrs",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "const_vrs_zero",
+      "Title": "0.0",
+      "Kind": "Const",
+      "X": 180.0,
+      "Y": 510.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 0.0
+    },
+    {
+      "Id": "const_vrs_one",
+      "Title": "1.0",
+      "Kind": "Const",
+      "X": 180.0,
+      "Y": 570.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 1.0
+    },
+    {
+      "Id": "clamp_vrs_eff",
+      "Title": "clamp 0..1",
+      "Kind": "Op",
+      "X": 680.0,
+      "Y": 290.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "min",
+          "Kind": "Input"
+        },
+        {
+          "Name": "max",
+          "Kind": "Input"
+        },
+        {
+          "Name": "clamp(a,min,max)",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "clamp"
+    },
+    {
+      "Id": "param_vrs_buffet_start",
+      "Kind": "Param",
+      "X": 590.0,
+      "Y": 410.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "VrsBuffetStart"
+        }
+      ],
+      "SignalGroup": "Aircraft"
+    },
+    {
+      "Id": "param_vrs_buffet_full",
+      "Kind": "Param",
+      "X": 590.0,
+      "Y": 480.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "VrsBuffetFull"
+        }
+      ],
+      "SignalGroup": "Aircraft"
+    },
+    {
+      "Id": "param_vrs_buffet_gain",
+      "Kind": "Param",
+      "X": 590.0,
+      "Y": 550.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "VrsBuffetGain"
+        }
+      ],
+      "SignalGroup": "Collective"
+    },
+    {
+      "Id": "vrs_buffet",
+      "Title": "VRS buffet env",
+      "Kind": "Func",
+      "X": 960.0,
+      "Y": 290.0,
+      "Ports": [
+        {
+          "Name": "alpha",
+          "Kind": "Input"
+        },
+        {
+          "Name": "start",
+          "Kind": "Input"
+        },
+        {
+          "Name": "full",
+          "Kind": "Input"
+        },
+        {
+          "Name": "gain",
+          "Kind": "Input"
+        },
+        {
+          "Name": "qhat_eff",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "Func": "buffet"
+    },
+    {
+      "Id": "in_rpm_norm",
+      "Title": "RPM (norm)",
+      "Kind": "Input",
+      "X": 30.0,
+      "Y": 900.0,
+      "Ports": [
+        {
+          "Name": "rpm_norm",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "mul_rpm_sq",
+      "Title": "rpm x rpm",
+      "Kind": "Op",
+      "X": 250.0,
+      "Y": 900.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "param_k_spring",
+      "Kind": "Param",
+      "X": 230.0,
+      "Y": 820.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "SpringGain"
+        }
+      ],
+      "SignalGroup": "FlightStickCollective"
+    },
+    {
+      "Id": "mul_spring",
+      "Title": "Spring x rpm^2 (CTM)",
+      "Kind": "Op",
+      "X": 480.0,
+      "Y": 930.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "param_spring_center",
+      "Kind": "Param",
+      "X": 230.0,
+      "Y": 1040.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "SpringCenter"
+        }
+      ],
+      "SignalGroup": "FlightStickCollective"
+    },
+    {
+      "Id": "out_spring",
+      "Kind": "Output",
+      "X": 1720.0,
+      "Y": 1500.0,
+      "Ports": [
+        {
+          "Kind": "Input",
+          "SignalSuffix": "SpringGain"
+        },
+        {
+          "Kind": "Input",
+          "SignalSuffix": "TrimOffset"
+        }
+      ],
+      "Scoped": true
+    },
+    {
+      "Id": "in_thump",
+      "Title": "Ground Buffet",
+      "Kind": "Input",
+      "X": 980.0,
+      "Y": 460.0,
+      "Ports": [
+        {
+          "Name": "gnd_buffet",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "add_buffet_total",
+      "Title": "buffet + thump",
+      "Kind": "Op",
+      "X": 1180.0,
+      "Y": 330.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a+b+c",
+          "Kind": "Output"
+        },
+        {
+          "Name": "c",
+          "Kind": "Input"
+        }
+      ],
+      "Op": "add"
+    },
+    {
+      "Id": "in_turb",
+      "Title": "Turbulence (|G hp|)",
+      "Kind": "Input",
+      "X": 870.0,
+      "Y": 640.0,
+      "Ports": [
+        {
+          "Name": "turb",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "param_turb_gain",
+      "Kind": "Param",
+      "X": 760.0,
+      "Y": 720.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "TurbBuffetGain"
+        }
+      ],
+      "SignalGroup": "Collective"
+    },
+    {
+      "Id": "mul_turb_buffet",
+      "Title": "turb x gain",
+      "Kind": "Op",
+      "X": 1030.0,
+      "Y": 650.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "940dc931e6494589950ff118092c5841",
+      "Title": "1.0",
+      "Kind": "Const",
+      "X": 720.0,
+      "Y": 620.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 1.0
+    },
+    {
+      "Id": "bc3d073456474874be57c45eeb8386f1",
+      "Title": "Relative to PosMin",
+      "Kind": "Op",
+      "X": 500.0,
+      "Y": 1040.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a+b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "add"
+    },
+    {
+      "Id": "94afdad9d9a44090a2b39ce094915918",
+      "Title": "ConfigIn",
+      "Kind": "ConfigIn",
+      "X": 10.0,
+      "Y": 1170.0,
+      "Ports": [
+        {
+          "Name": "FlightControl.PosMin",
+          "Kind": "Output",
+          "ConfigField": "FlightControl.PosMin"
+        },
+        {
+          "Name": "FlightControl.PosMax",
+          "Kind": "Output",
+          "ConfigField": "FlightControl.PosMax"
+        }
+      ],
+      "Scoped": true
+    },
+    {
+      "Id": "d8b10c197189420d8ae27287cbf7c394",
+      "Title": "Op",
+      "Kind": "Op",
+      "X": 220.0,
+      "Y": 1130.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a-b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "sub"
+    },
+    {
+      "Id": "364678fb0cef4709b0b980feb6fb6edd",
+      "Title": "Op",
+      "Kind": "Op",
+      "X": 350.0,
+      "Y": 1130.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a/b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "div"
+    },
+    {
+      "Id": "1610b0aadeb842dcb1acbadfc4e6323a",
+      "Title": "2",
+      "Kind": "Const",
+      "X": 220.0,
+      "Y": 1240.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 2.0
+    },
+    {
+      "Id": "4b06004023bc415e93869d717e67a069",
+      "Title": "",
+      "Kind": "Input",
+      "X": 100.0,
+      "Y": 1550.0,
+      "Ports": [
+        {
+          "Name": "axis_position",
+          "Kind": "Output"
+        },
+        {
+          "Name": "axis_center",
+          "Kind": "Output"
+        },
+        {
+          "Name": "axis_force",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "cc7258c7991644e9b2fb3774bd73b6ca",
+      "Title": "VirtualPosition",
+      "Kind": "Output",
+      "X": 610.0,
+      "Y": 1440.0,
+      "Ports": [
+        {
+          "Name": "pos_virt",
+          "Kind": "Input"
+        }
+      ]
+    },
+    {
+      "Id": "0551e455005045eeb4f33287ae9e5fd2",
+      "Title": "Func",
+      "Kind": "Func",
+      "X": 460.0,
+      "Y": 1370.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        },
+        {
+          "Name": "in",
+          "Kind": "Input"
+        },
+        {
+          "Name": "in_min",
+          "Kind": "Input"
+        },
+        {
+          "Name": "in_max",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out_min",
+          "Kind": "Input"
+        },
+        {
+          "Name": "out_max",
+          "Kind": "Input"
+        }
+      ],
+      "Func": "normalize"
+    },
+    {
+      "Id": "a87054b096474952a89a8ec2f7084e08",
+      "Title": "0",
+      "Kind": "Const",
+      "X": 280.0,
+      "Y": 1470.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 0.0
+    },
+    {
+      "Id": "026a4152fc2a4d06bce1f5bf9d198326",
+      "Title": "1",
+      "Kind": "Const",
+      "X": 290.0,
+      "Y": 1540.0,
+      "Ports": [
+        {
+          "Name": "out",
+          "Kind": "Output"
+        }
+      ],
+      "ConstValue": 1.0
+    },
+    {
+      "Id": "in_ffb_api",
+      "Title": "FFB API",
+      "Kind": "Input",
+      "X": 990.0,
+      "Y": 1500.0,
+      "Ports": [
+        {
+          "Name": "api_trim",
+          "Kind": "Output"
+        },
+        {
+          "Name": "api_tr_on",
+          "Kind": "Output"
+        },
+        {
+          "Name": "api_has_trim",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "param_trim_tau",
+      "Kind": "Param",
+      "X": 990.0,
+      "Y": 1680.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "TrimDamperTC"
+        }
+      ],
+      "SignalGroup": "FlightStickCollective"
+    },
+    {
+      "Id": "param_ft_on",
+      "Kind": "Param",
+      "X": 990.0,
+      "Y": 1750.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlyThroughOnForce"
+        }
+      ],
+      "SignalGroup": "FlightStickCollective"
+    },
+    {
+      "Id": "param_ft_off",
+      "Kind": "Param",
+      "X": 990.0,
+      "Y": 1820.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "FlyThroughOffForce"
+        }
+      ],
+      "SignalGroup": "FlightStickCollective"
+    },
+    {
+      "Id": "ffb_api_trim_include",
+      "Title": "FFB API Trim",
+      "Kind": "Include",
+      "X": 1360.0,
+      "Y": 1500.0,
+      "IncludePath": "ffb_api_trim.json",
+      "InputPortOrder": [
+        "api_trim",
+        "api_tr_on",
+        "api_has_trim",
+        "axis_force",
+        "axis_center",
+        "pos_min",
+        "pos_max",
+        "base_spring",
+        "fallback_trim",
+        "trim_tau",
+        "ft_on_force",
+        "ft_off_force"
+      ]
+    },
+    {
+      "Id": "out_fly_through",
+      "Title": "Fly-Through",
+      "Kind": "Output",
+      "X": 1720.0,
+      "Y": 1650.0,
+      "Ports": [
+        {
+          "Name": "fly_through",
+          "Kind": "Input"
+        }
+      ]
+    },
+    {
+      "Id": "in_hyd",
+      "Title": "Hydraulics",
+      "Kind": "Input",
+      "X": 900.0,
+      "Y": 780.0,
+      "Ports": [
+        {
+          "Name": "hyd_loss",
+          "Kind": "Output"
+        }
+      ]
+    },
+    {
+      "Id": "param_hyd_friction",
+      "Kind": "Param",
+      "X": 760.0,
+      "Y": 880.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "HydFrictionAdd"
+        }
+      ],
+      "SignalGroup": "FlightStickCollective"
+    },
+    {
+      "Id": "param_hyd_damper",
+      "Kind": "Param",
+      "X": 780.0,
+      "Y": 980.0,
+      "Ports": [
+        {
+          "Kind": "Output",
+          "SignalSuffix": "HydDamperAdd"
+        }
+      ],
+      "SignalGroup": "FlightStickCollective"
+    },
+    {
+      "Id": "mul_hyd_friction",
+      "Title": "loss x add",
+      "Kind": "Op",
+      "X": 1120.0,
+      "Y": 800.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "add_friction_eff",
+      "Title": "friction + hyd",
+      "Kind": "Op",
+      "X": 1300.0,
+      "Y": 160.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a+b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "add"
+    },
+    {
+      "Id": "mul_hyd_damper",
+      "Title": "loss x add",
+      "Kind": "Op",
+      "X": 1120.0,
+      "Y": 950.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a*b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "mul"
+    },
+    {
+      "Id": "add_damper_eff",
+      "Title": "damper + hyd",
+      "Kind": "Op",
+      "X": 1300.0,
+      "Y": 40.0,
+      "Ports": [
+        {
+          "Name": "a",
+          "Kind": "Input"
+        },
+        {
+          "Name": "b",
+          "Kind": "Input"
+        },
+        {
+          "Name": "a+b",
+          "Kind": "Output"
+        }
+      ],
+      "Op": "add"
+    }
+  ],
+  "Links": [
+    {
+      "FromNodeId": "in_precalc",
+      "FromPort": "torque_norm",
+      "ToNodeId": "load",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "param_k_load",
+      "FromPort": "LoadGain",
+      "ToNodeId": "load",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "load",
+      "FromPort": "a*-b",
+      "ToNodeId": "out_scoped",
+      "ToPort": "LoadForce"
+    },
+    {
+      "FromNodeId": "const_vrs_zero",
+      "FromPort": "out",
+      "ToNodeId": "clamp_vrs_eff",
+      "ToPort": "min"
+    },
+    {
+      "FromNodeId": "const_vrs_one",
+      "FromPort": "out",
+      "ToNodeId": "clamp_vrs_eff",
+      "ToPort": "max"
+    },
+    {
+      "FromNodeId": "clamp_vrs_eff",
+      "FromPort": "clamp(a,min,max)",
+      "ToNodeId": "vrs_buffet",
+      "ToPort": "alpha"
+    },
+    {
+      "FromNodeId": "param_vrs_buffet_start",
+      "FromPort": "VrsBuffetStart",
+      "ToNodeId": "vrs_buffet",
+      "ToPort": "start"
+    },
+    {
+      "FromNodeId": "param_vrs_buffet_full",
+      "FromPort": "VrsBuffetFull",
+      "ToNodeId": "vrs_buffet",
+      "ToPort": "full"
+    },
+    {
+      "FromNodeId": "param_vrs_buffet_gain",
+      "FromPort": "VrsBuffetGain",
+      "ToNodeId": "vrs_buffet",
+      "ToPort": "gain"
+    },
+    {
+      "FromNodeId": "add_buffet_total",
+      "FromPort": "a+b+c",
+      "ToNodeId": "out_scoped",
+      "ToPort": "BuffetAmplitude"
+    },
+    {
+      "FromNodeId": "in_vrs",
+      "FromPort": "vrs",
+      "ToNodeId": "clamp_vrs_eff",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "in_rpm_norm",
+      "FromPort": "rpm_norm",
+      "ToNodeId": "mul_rpm_sq",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "in_rpm_norm",
+      "FromPort": "rpm_norm",
+      "ToNodeId": "mul_rpm_sq",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "param_k_spring",
+      "FromPort": "SpringGain",
+      "ToNodeId": "mul_spring",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "mul_rpm_sq",
+      "FromPort": "a*b",
+      "ToNodeId": "mul_spring",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "param_spring_center",
+      "FromPort": "SpringCenter",
+      "ToNodeId": "bc3d073456474874be57c45eeb8386f1",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "vrs_buffet",
+      "FromPort": "out",
+      "ToNodeId": "add_buffet_total",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "in_thump",
+      "FromPort": "gnd_buffet",
+      "ToNodeId": "add_buffet_total",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "in_turb",
+      "FromPort": "turb",
+      "ToNodeId": "mul_turb_buffet",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "param_turb_gain",
+      "FromPort": "TurbBuffetGain",
+      "ToNodeId": "mul_turb_buffet",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "mul_turb_buffet",
+      "FromPort": "a*b",
+      "ToNodeId": "add_buffet_total",
+      "ToPort": "c"
+    },
+    {
+      "FromNodeId": "940dc931e6494589950ff118092c5841",
+      "FromPort": "out",
+      "ToNodeId": "vrs_buffet",
+      "ToPort": "qhat_eff"
+    },
+    {
+      "FromNodeId": "94afdad9d9a44090a2b39ce094915918",
+      "FromPort": "FlightControl.PosMin",
+      "ToNodeId": "d8b10c197189420d8ae27287cbf7c394",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "94afdad9d9a44090a2b39ce094915918",
+      "FromPort": "FlightControl.PosMax",
+      "ToNodeId": "d8b10c197189420d8ae27287cbf7c394",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "d8b10c197189420d8ae27287cbf7c394",
+      "FromPort": "a-b",
+      "ToNodeId": "364678fb0cef4709b0b980feb6fb6edd",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "1610b0aadeb842dcb1acbadfc4e6323a",
+      "FromPort": "out",
+      "ToNodeId": "364678fb0cef4709b0b980feb6fb6edd",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "364678fb0cef4709b0b980feb6fb6edd",
+      "FromPort": "a/b",
+      "ToNodeId": "bc3d073456474874be57c45eeb8386f1",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "4b06004023bc415e93869d717e67a069",
+      "FromPort": "axis_position",
+      "ToNodeId": "0551e455005045eeb4f33287ae9e5fd2",
+      "ToPort": "in"
+    },
+    {
+      "FromNodeId": "94afdad9d9a44090a2b39ce094915918",
+      "FromPort": "FlightControl.PosMin",
+      "ToNodeId": "0551e455005045eeb4f33287ae9e5fd2",
+      "ToPort": "in_min"
+    },
+    {
+      "FromNodeId": "94afdad9d9a44090a2b39ce094915918",
+      "FromPort": "FlightControl.PosMax",
+      "ToNodeId": "0551e455005045eeb4f33287ae9e5fd2",
+      "ToPort": "in_max"
+    },
+    {
+      "FromNodeId": "a87054b096474952a89a8ec2f7084e08",
+      "FromPort": "out",
+      "ToNodeId": "0551e455005045eeb4f33287ae9e5fd2",
+      "ToPort": "out_min"
+    },
+    {
+      "FromNodeId": "026a4152fc2a4d06bce1f5bf9d198326",
+      "FromPort": "out",
+      "ToNodeId": "0551e455005045eeb4f33287ae9e5fd2",
+      "ToPort": "out_max"
+    },
+    {
+      "FromNodeId": "0551e455005045eeb4f33287ae9e5fd2",
+      "FromPort": "out",
+      "ToNodeId": "cc7258c7991644e9b2fb3774bd73b6ca",
+      "ToPort": "pos_virt"
+    },
+    {
+      "FromNodeId": "in_ffb_api",
+      "FromPort": "api_trim",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "api_trim"
+    },
+    {
+      "FromNodeId": "in_ffb_api",
+      "FromPort": "api_tr_on",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "api_tr_on"
+    },
+    {
+      "FromNodeId": "in_ffb_api",
+      "FromPort": "api_has_trim",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "api_has_trim"
+    },
+    {
+      "FromNodeId": "4b06004023bc415e93869d717e67a069",
+      "FromPort": "axis_force",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "axis_force"
+    },
+    {
+      "FromNodeId": "4b06004023bc415e93869d717e67a069",
+      "FromPort": "axis_center",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "axis_center"
+    },
+    {
+      "FromNodeId": "94afdad9d9a44090a2b39ce094915918",
+      "FromPort": "FlightControl.PosMin",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "pos_min"
+    },
+    {
+      "FromNodeId": "94afdad9d9a44090a2b39ce094915918",
+      "FromPort": "FlightControl.PosMax",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "pos_max"
+    },
+    {
+      "FromNodeId": "mul_spring",
+      "FromPort": "a*b",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "base_spring"
+    },
+    {
+      "FromNodeId": "bc3d073456474874be57c45eeb8386f1",
+      "FromPort": "a+b",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "fallback_trim"
+    },
+    {
+      "FromNodeId": "param_trim_tau",
+      "FromPort": "TrimDamperTC",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "trim_tau"
+    },
+    {
+      "FromNodeId": "param_ft_on",
+      "FromPort": "FlyThroughOnForce",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "ft_on_force"
+    },
+    {
+      "FromNodeId": "param_ft_off",
+      "FromPort": "FlyThroughOffForce",
+      "ToNodeId": "ffb_api_trim_include",
+      "ToPort": "ft_off_force"
+    },
+    {
+      "FromNodeId": "ffb_api_trim_include",
+      "FromPort": "spring_gain",
+      "ToNodeId": "out_spring",
+      "ToPort": "SpringGain"
+    },
+    {
+      "FromNodeId": "ffb_api_trim_include",
+      "FromPort": "trim_offset",
+      "ToNodeId": "out_spring",
+      "ToPort": "TrimOffset"
+    },
+    {
+      "FromNodeId": "ffb_api_trim_include",
+      "FromPort": "fly_through",
+      "ToNodeId": "out_fly_through",
+      "ToPort": "fly_through"
+    },
+    {
+      "FromNodeId": "in_hyd",
+      "FromPort": "hyd_loss",
+      "ToNodeId": "mul_hyd_friction",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "param_hyd_friction",
+      "FromPort": "HydFrictionAdd",
+      "ToNodeId": "mul_hyd_friction",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "param_k_friction",
+      "FromPort": "Friction",
+      "ToNodeId": "add_friction_eff",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "mul_hyd_friction",
+      "FromPort": "a*b",
+      "ToNodeId": "add_friction_eff",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "in_hyd",
+      "FromPort": "hyd_loss",
+      "ToNodeId": "mul_hyd_damper",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "param_hyd_damper",
+      "FromPort": "HydDamperAdd",
+      "ToNodeId": "mul_hyd_damper",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "param_k_damper",
+      "FromPort": "DamperGain",
+      "ToNodeId": "add_damper_eff",
+      "ToPort": "a"
+    },
+    {
+      "FromNodeId": "mul_hyd_damper",
+      "FromPort": "a*b",
+      "ToNodeId": "add_damper_eff",
+      "ToPort": "b"
+    },
+    {
+      "FromNodeId": "add_friction_eff",
+      "FromPort": "a+b",
+      "ToNodeId": "out_scoped",
+      "ToPort": "Friction"
+    },
+    {
+      "FromNodeId": "add_damper_eff",
+      "FromPort": "a+b",
+      "ToNodeId": "out_scoped",
+      "ToPort": "DamperGain"
+    }
+  ],
+  "Params": [
+    {
+      "Name": "FlightStickCollective.DamperGain",
+      "DefaultValue": 0.5,
+      "Min": 0.0,
+      "Max": 5.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Damper Gain",
+        "Group": "FlightStickCollective",
+        "Units": "N*s/mm",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "FlightStickCollective.Friction",
+      "DefaultValue": 0.3,
+      "Min": 0.0,
+      "Max": 5.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Friction",
+        "Group": "FlightStickCollective",
+        "Units": "N",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "FlightStickCollective.LoadGain",
+      "DefaultValue": 0.2,
+      "Min": 0.0,
+      "Max": 5.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Torque Load (residual)",
+        "Group": "FlightStickCollective",
+        "Units": "N @ trq_ref",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Collective.VrsBuffetGain",
+      "DefaultValue": 1.0,
+      "Min": 0.0,
+      "Max": 100.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "VRS Buffet Gain",
+        "Group": "Collective",
+        "Units": "N",
+        "Step": 0.05,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Aircraft.VrsBuffetStart",
+      "DefaultValue": 0.0,
+      "Min": 0.0,
+      "Max": 1.0,
+      "Ui": null
+    },
+    {
+      "Name": "Aircraft.VrsBuffetFull",
+      "DefaultValue": 0.0,
+      "Min": 0.0,
+      "Max": 1.0,
+      "Ui": null
+    },
+    {
+      "Name": "FlightStickCollective.SpringGain",
+      "DefaultValue": 0.3,
+      "Min": 0.0,
+      "Max": 5.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Flat-Pitch Spring",
+        "Group": "FlightStickCollective",
+        "Units": "N/mm @ RPM nom",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "FlightStickCollective.SpringCenter",
+      "DefaultValue": -20.0,
+      "Min": -50.0,
+      "Max": 50.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Spring Center (low-pitch stop)",
+        "Group": "FlightStickCollective",
+        "Units": "mm",
+        "Step": 0.5,
+        "Precision": 1,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "Collective.TurbBuffetGain",
+      "DefaultValue": 1.0,
+      "Min": 0.0,
+      "Max": 10.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Turbulence Buffet",
+        "Group": "Collective",
+        "Units": "N/G",
+        "Step": 0.1,
+        "Precision": 1,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "FlightStickCollective.TrimDamperTC",
+      "DefaultValue": 0.05,
+      "Min": 0.0,
+      "Max": 1.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Trim Smoothing",
+        "Group": "FlightStickCollective",
+        "Units": "s",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "FlightStickCollective.FlyThroughOnForce",
+      "DefaultValue": 6.0,
+      "Min": 0.5,
+      "Max": 40.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Fly-Through On Force",
+        "Group": "FlightStickCollective",
+        "Units": "N",
+        "Step": 0.1,
+        "Precision": 1,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "FlightStickCollective.FlyThroughOffForce",
+      "DefaultValue": 3.0,
+      "Min": 0.0,
+      "Max": 40.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Fly-Through Off Force",
+        "Group": "FlightStickCollective",
+        "Units": "N",
+        "Step": 0.1,
+        "Precision": 1,
+        "LogScale": false,
+        "Options": []
+      }
+    },
+    {
+      "Name": "FlightStickCollective.HydFrictionAdd",
+      "DefaultValue": 0.0,
+      "Min": 0.0,
+      "Max": 20.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Hyd Loss Friction",
+        "Group": "FlightStickCollective",
+        "Units": "N",
+        "Step": 0.1,
+        "Precision": 1,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    },
+    {
+      "Name": "FlightStickCollective.HydDamperAdd",
+      "DefaultValue": 0.0,
+      "Min": 0.0,
+      "Max": 10.0,
+      "Ui": {
+        "Widget": "slider",
+        "Label": "Hyd Loss Damping",
+        "Group": "FlightStickCollective",
+        "Units": "N*s/mm",
+        "Step": 0.01,
+        "Precision": 2,
+        "LogScale": false,
+        "MuteValue": 0.0,
+        "Options": []
+      }
+    }
+  ],
+  "ParamValues": null
+}
