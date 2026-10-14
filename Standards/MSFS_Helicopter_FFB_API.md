@@ -111,6 +111,46 @@ Per control (cyclic trim can only be unclutched for both axes simultaneously):
 - Normalized values are **−1..+1**, `0` = neutral / mid-travel. Positive = **pitch
   nose-up**, **roll right**, **collective up**, **right pedal (yaw right)**.
 
+### 3.6 Reserved legacy names
+
+The following LVARs predate this API and are already written by shipped FFB software
+(TelemFFB) to *any* helicopter, including aircraft that do not implement this standard:
+
+| LVAR | Dir | Unit | Status |
+|------|-----|------|--------|
+| `L:FFB_HANDS_ON_CYCLIC` | rig→aircraft | bool | Legacy — reserved, do not reuse |
+| `L:FFB_HANDS_ON_CYCLICX` | rig→aircraft | bool | Legacy — reserved, do not reuse |
+| `L:FFB_HANDS_ON_CYCLICY` | rig→aircraft | bool | Legacy — reserved, do not reuse |
+| `L:FFB_FEET_ON_PEDALS` | rig→aircraft | bool | Legacy — reserved, do not reuse |
+
+They carry roughly the meaning `L:FFB_<AXIS>_FLY_THROUGH` (§3.3) now carries, but with
+no mode gate and no version gate. They are **reserved**: a future revision of this API
+must not reuse these names for anything else, and an aircraft may continue to read them
+if it already does.
+
+New implementations should use `L:FFB_<AXIS>_FLY_THROUGH` instead. These names are the
+sole documented exception to the "write no `L:FFB_*` variable to an unsupported
+aircraft" rule in §4 step 1 — a rig may keep writing them from its legacy code path,
+but must not emit them as part of this API.
+
+### 3.7 Why there is no rig→aircraft capability advertisement
+
+This API is deliberately asymmetric: `L:FFB_FEATURES` (§3.1) advertises *aircraft*
+capabilities, and there is no counterpart by which the aircraft learns what the rig can
+do. This is a decision, not an oversight.
+
+The obvious candidate would be telling the aircraft whether `L:FFB_<AXIS>_FLY_THROUGH`
+(§3.3) is derived from real force sensing or merely from position deviation. That
+information is not actionable: the rig always publishes the best signal its hardware can
+produce, and the aircraft has no alternative source to fall back to. Advertising the
+derivation method would only invite the aircraft to second-guess a value it cannot
+improve on.
+
+`L:FFB_API_VERSION` therefore remains the only gate. If a future revision adds
+rig→aircraft variables whose presence genuinely changes aircraft behavior, a
+`L:FFB_RIG_FEATURES` bitfield can be added then — absent reads as `0`, so aircraft
+written against this revision stay correct.
+
 ---
 
 ## 4. Lifecycle (rig side)
@@ -120,7 +160,8 @@ step 4 is the per-frame loop; step 5 is the exit.
 
 1. **Detect.** Read `L:FFB_API_VERSION`. If it is `0`/absent or below the rig's
    minimum supported revision, treat the aircraft as unsupported and stay in
-   legacy mode — do not write any `L:FFB_*` variable. Stop here.
+   legacy mode — do not write any `L:FFB_*` variable, except the reserved legacy
+   names in §3.6. Stop here.
 2. **Read capabilities once.** Read `L:FFB_FEATURES` and cache the bits
    (re-read on aircraft change, not per frame).
 3. **Enter FFB mode.** For each control the rig physically provides, write
