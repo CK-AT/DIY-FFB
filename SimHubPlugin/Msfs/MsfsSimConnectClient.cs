@@ -129,6 +129,18 @@ namespace DiyFfb.Msfs
         // Guarded by _writeLock; snapshot exposed to the editor via WriteFailedVars.
         private Dictionary<string, uint> _writeFailed =
             new Dictionary<string, uint>(StringComparer.Ordinal);
+
+        // A var the aircraft has not created yet fails its probe and is then
+        // dropped for the rest of the session. An aircraft (re)load publishes its
+        // LVARs a beat after SimConnect is ready, so a graph reading them (e.g.
+        // the L:FFB_* helicopter API set) can come up permanently blind. Re-probe
+        // the rejected ones on a widening schedule after each configure, then give
+        // up so an aircraft that genuinely lacks them stops costing reconfigures.
+        // A retry is a full Configure and briefly stops the stream, hence few
+        // attempts, spread out.
+        private static readonly int[] FailedVarRetryDelaysMs = { 4000, 10000, 20000, 40000 };
+        private DateTime _lastConfigureUtc = DateTime.MinValue;
+        private int _failedVarRetries;
         private const uint InputEventRequestId = 1001;
         private const int  EnumerateTimeoutMs  = 500;
         private const int  MaxEnumeratePages   = 256;
@@ -429,6 +441,10 @@ namespace DiyFfb.Msfs
         // time and only survivors join the definition.
         private void Configure(NamedPipeClientStream pipe, bool clearFirst)
         {
+            // A configure someone else asked for — a fresh session (no clear yet)
+            // or a changed var set — restarts the retry schedule. One we triggered
+            // ourselves continues it.
+            if (!clearFirst || _customsDirty || _writablesDirty) _failedVarRetries = 0;
             _customsDirty = false;
             _writablesDirty = false;
 
@@ -498,6 +514,29 @@ namespace DiyFfb.Msfs
             _log($"[MsfsSimConnect] connected, streaming SIM_FRAME: {DefaultCount} defaults + {survivors.Count} custom ({failed.Count} rejected).");
 
             ConfigureWritables(pipe, clearFirst);
+
+            // Stamp last so the retry delay measures from a finished configure,
+            // not from the start of one that spent a second probing.
+            _lastConfigureUtc = DateTime.UtcNow;
+        }
+
+        /// <summary>
+        /// True when the last configure rejected at least one read or write target
+        /// and the next retry slot is due. Bounded by the schedule length, so an
+        /// aircraft that will never have those vars settles after the last attempt.
+        /// </summary>
+        private bool ShouldRetryFailedVars(out int pending)
+        {
+            // Called every read-loop iteration, so the two cheap worker-owned
+            // checks gate the locks rather than the other way round.
+            pending = 0;
+            if (_failedVarRetries >= FailedVarRetryDelaysMs.Length) return false;
+            if ((DateTime.UtcNow - _lastConfigureUtc).TotalMilliseconds
+                < FailedVarRetryDelaysMs[_failedVarRetries]) return false;
+
+            lock (_stateLock) { pending += _failed.Count; }
+            lock (_writeLock) { pending += _writeFailed.Count; }
+            return pending > 0;
         }
 
         // Plan 24: (re)build the A:/L: write defines — one define per writable var
@@ -816,6 +855,18 @@ namespace DiyFfb.Msfs
                 // same reconfigure gate (plan 24 §4.2).
                 if (_customsDirty || _writablesDirty)
                 {
+                    StopStream(pipe);
+                    return LoopResult.Reconfigure;
+                }
+
+                // Vars rejected last time may exist by now — the aircraft was
+                // probably still loading when we probed. Re-register on the
+                // widening retry schedule.
+                if (ShouldRetryFailedVars(out int pendingVars))
+                {
+                    _failedVarRetries++;
+                    _log($"[MsfsSimConnect] re-probing {pendingVars} rejected var(s) " +
+                         $"(attempt {_failedVarRetries}/{FailedVarRetryDelaysMs.Length}).");
                     StopStream(pipe);
                     return LoopResult.Reconfigure;
                 }
