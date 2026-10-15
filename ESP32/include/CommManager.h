@@ -99,7 +99,7 @@ class CommManager {
         void on_axis_message(AxisID axis_id, const Message &msg, const uint8_t *protobuf_msg, uint16_t len_protobuf_msg, CommChannel comm_channel);
         bool send_message_to_axis(AxisID axis_id, const Message &message, const uint8_t *raw_data, uint32_t len_raw_data);
         void send_active_function_message(AxisID axis_id, FunctionID function_id, CommChannel comm_channel);
-        void send_axis_log_msg(const char *buff);
+        void send_axis_log_msg(const char *buff, bool local_only = false);
         void send_gateway_log_msg(const char *buff);
         void pump_log(int max_samples, int timeout = 0);
         void on_ffb_action(const FFBAction &ffb_action);

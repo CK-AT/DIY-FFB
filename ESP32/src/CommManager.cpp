@@ -312,28 +312,32 @@ void CommManager::setup(Stream *serial, CANConfig &can_config, ConfigManager *co
 void CommManager::pump_log(int max_samples, int timeout) {
     char buff[MAX_LOG_LINE_LENGTH];
     while (max_samples) {
-        if (has_gateway()) {
+        // Peek first: a local-only line must not be held back by an uplink that
+        // cannot currently accept relayed logs, otherwise CAN diagnostics are
+        // suppressed precisely while the bus is in trouble.
+        if (pdTRUE != xQueuePeek(_log_queue_data, buff, /*xTicksToWait=*/timeout)) break;
+        bool local_only = (buff[0] == LOG_LOCAL_ONLY_MARK);
+        if (!local_only && has_gateway()) {
             if (!active_uplink_channel->ready_to_receive_log_message()) return;
         }
-        if (pdTRUE == xQueueReceive(_log_queue_data, buff, /*xTicksToWait=*/timeout)) {
-            if (_is_gateway) {
-                send_gateway_log_msg(buff);
-            } else {
-                send_axis_log_msg(buff);
-            }
+        if (pdTRUE != xQueueReceive(_log_queue_data, buff, /*xTicksToWait=*/0)) break;
+        const char *line = local_only ? buff + 1 : buff;
+        if (_is_gateway) {
+            send_gateway_log_msg(line);
         } else {
-            break;
+            send_axis_log_msg(line, local_only);
         }
         max_samples--;
     }
 }
 
-void CommManager::send_axis_log_msg(const char *buff) {
+void CommManager::send_axis_log_msg(const char *buff, bool local_only) {
     log_msg.payload.axis_log_message.axis_id = get_axis_id();
     log_msg.which_payload = Message_axis_log_message_tag;
     memset(log_msg.payload.axis_log_message.msg, 0, sizeof(log_msg.payload.axis_log_message.msg));
     strncpy(log_msg.payload.axis_log_message.msg, buff, sizeof(log_msg.payload.axis_log_message.msg) - 1);
-    if (has_gateway()) {
+    // local_only: skip the ISO-TP relay, go straight out this axis's own USB.
+    if (!local_only && has_gateway()) {
         send_message_to_gateway(log_msg, CommChannel::ISOTP);
     }
     send_message_to_host(log_msg);
