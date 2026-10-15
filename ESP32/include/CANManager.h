@@ -149,6 +149,9 @@ class CANManager : public ICommChannel {
         uint32_t rx_err_cnt = 0;
         uint32_t ti_state_change = 0;
         BusState bus_state = BusState::PRE_ONLINE;
+        // State for the TEC-climb diagnostic in check_bus().
+        uint32_t _tec_last_logged = 0;
+        uint32_t _ti_last_tec_log = 0;
         uint32_t ti_last_ping = 0;
         uint32_t ti_last_log_sent = 0;
         /* Axis related */

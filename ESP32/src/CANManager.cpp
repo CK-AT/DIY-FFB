@@ -1,5 +1,6 @@
 #include <CANManager.h>
 #include <LogOutput.h>
+#include <driver/twai.h>  // twai_get_status_info() for the BUS_OFF diagnostic
 #include <math.h>
 
 /*****************************************************************************************************************/
@@ -254,11 +255,62 @@ bool CANManager::is_online(AxisID axis_id) {
 
 bool CANManager::check_bus(uint32_t ti_now) {
     auto can_state = ESP32Can.canState();
+
+    // Bus health watchdog. On a healthy bus this is silent: with the bit timing
+    // pinned in shared_setup() TEC rests at 0 and these lines never appear. They
+    // return if the timing margin is lost again -- which is how the IDF 5.1 ->
+    // 5.5 macro change was caught -- or if the wiring degrades.
+    //
+    // Sample the climb, not the aftermath: at BUS_OFF the controller has already
+    // reset TEC to its recovery value of 128, so the count that actually crossed
+    // the threshold is gone by the time bus-off is reported.
+    //
+    // Reading the output: TEC rises 8 per failed transmission and falls 1 per
+    // success, so sustained oscillation means a real error rate -- over ~11% of
+    // frames must fail for it to trend upward at all. bus_err counts
+    // bit/stuff/CRC/form/ACK errors, but it STOPS being maintained after a
+    // bus-off recover(), so only the first ramp of a session is a valid rate.
+    // arb is ordinary arbitration loss, not an error. drop is our own count of
+    // writeFrame() refused by a full TX queue.
+    //
+    // printf_local keeps this off CAN entirely -- it goes out this device's own
+    // USB, so the instrument cannot load the bus it is measuring. Rate-limited
+    // to one line per 32 counts of movement, at most every 200 ms.
+    {
+        twai_status_info_t st = {};
+        if (twai_get_status_info(&st) == ESP_OK) {
+            uint32_t tec = st.tx_error_counter;
+            if (tec == 0) {
+                _tec_last_logged = 0;
+            } else if ((tec > _tec_last_logged + 31 || tec + 31 < _tec_last_logged) && (ti_now - _ti_last_tec_log) > 200000) {
+                _ti_last_tec_log = ti_now;
+                _tec_last_logged = tec;
+                LogOutput::printf_local("CANManager: tec=%u rec=%u bus_err=%u arb=%u drop=%u q_tx=%u",
+                                  (unsigned)tec, (unsigned)st.rx_error_counter, (unsigned)st.bus_error_count,
+                                  (unsigned)st.arb_lost_count, (unsigned)tx_err_cnt, (unsigned)st.msgs_to_tx);
+            }
+        }
+    }
+
     switch (bus_state) {
         case BusState::ONLINE:
             if (can_state == TWAI_STATE_BUS_OFF) {
                 switch_bus_state(ti_now, BusState::BUS_OFF);
-                LogOutput::printf("CANManager: BUS_OFF");
+                // Snapshot on the way down. Weaker evidence than the ramp above --
+                // TEC already reads the recovery value, and bus_err may be frozen
+                // from an earlier recovery -- but it timestamps the event and
+                // carries the one-shot counters the periodic line omits
+                // (tx_fail, rx_miss).
+                twai_status_info_t st = {};
+                if (twai_get_status_info(&st) == ESP_OK) {
+                    LogOutput::printf_local("CANManager: BUS_OFF tec=%u rec=%u bus_err=%u arb_lost=%u tx_fail=%u rx_miss=%u q_tx=%u tx_drop=%u",
+                                      (unsigned)st.tx_error_counter, (unsigned)st.rx_error_counter,
+                                      (unsigned)st.bus_error_count, (unsigned)st.arb_lost_count,
+                                      (unsigned)st.tx_failed_count, (unsigned)st.rx_missed_count,
+                                      (unsigned)st.msgs_to_tx, (unsigned)tx_err_cnt);
+                } else {
+                    LogOutput::printf_local("CANManager: BUS_OFF (status unavailable) tx_drop=%u", (unsigned)tx_err_cnt);
+                }
             }
             break;
         case BusState::BUS_OFF:
