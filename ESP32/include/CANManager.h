@@ -96,7 +96,7 @@ class CANManager : public ICommChannel {
                    OnAxisPayload on_axis_payload, OnAxisStateChange on_axis_state_change, OnGatewayStateChange on_gateway_state_change,
                    OnDdsSync on_dds_sync = nullptr);
         bool send_force_and_position(float &f_contact_point, float &x_contact_point) override;
-        bool send_message_to_gateway(const Message &message, const uint8_t *raw_data, uint32_t len_raw_data) override;
+        bool send_message_to_gateway(const Message &message, const uint8_t *raw_data, size_t len_raw_data) override;
         bool ready_to_receive_log_message(void) override;
         bool update_position_limits(float x_contact_point_min, float x_contact_point_max) override;
         bool update_function_id(FunctionID function_id) override;
@@ -110,7 +110,7 @@ class CANManager : public ICommChannel {
             return _gateway_online;
         };
         /* Gateway related */
-        bool send_message_to_axis(AxisID axis_id, const Message &message, const uint8_t *raw_data, uint32_t len_raw_data) override;
+        bool send_message_to_axis(AxisID axis_id, const Message &message, const uint8_t *raw_data, size_t len_raw_data) override;
         bool send_dds_sync(float dds1_hz, float dds1_phase,
                            float dds2_hz, float dds2_phase) override;
         void set_gateway_mode(bool enable) override {

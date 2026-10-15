@@ -107,14 +107,153 @@ static Servo::HomingDirection to_homing_direction(const AxisConfig *axis_cfg) {
     return Servo::HomingDirection::Negative;
 }
 
+#if PROTOCOL_OVER_USB_CDC
+    // Paired state: owning the CDC instance only works if the core has NOT already
+    // started USB from app_main. With both set there would be two CDC interfaces
+    // (the core's USBSerial plus ours) and the identity would be frozen again.
+    #if ARDUINO_USB_CDC_ON_BOOT
+        #error "PROTOCOL_OVER_USB_CDC requires ARDUINO_USB_CDC_ON_BOOT=0 (see platformio.ini)"
+    #endif
+
+    #include <USB.h>
+    #include <USBCDC.h>
+    // usb_persist_restart() / RESTART_BOOTLOADER; not pulled in by USBCDC.h.
+    #include "esp32-hal-tinyusb.h"
+    #include "esp_mac.h"
+
+    #ifndef TUSB_DESC_STRING
+        #define TUSB_DESC_STRING 0x03
+    #endif
+
+// Replaces the core's weak tud_descriptor_string_cb (esp32-hal-tinyusb.c).
+//
+// This is a composite device (bDeviceClass 0xEF + IAD), so Windows creates a
+// child devnode per function and names each one from its INTERFACE string, not
+// from iProduct. The joystick therefore enumerated as "TinyUSB HID"; the correct
+// name only ever appeared on machines still caching it from the older,
+// non-composite HID-only firmware (cached under the usbflags registry key).
+//
+// The core's string table is static, so a single entry cannot be patched -- the
+// whole callback has to be supplied. Indices 0..3 are the device-level strings
+// the HAL always allocates first; everything from 4 up is an interface or
+// configuration string (currently 4 = HID, 5 = CDC, 6 = configuration). They all
+// return the product name on purpose: it stays correct if the interface order
+// ever shifts, and it gives the CDC port a real name in Device Manager too.
+//
+// Index 3 reproduces the HAL's serial byte-for-byte -- lowercase hex of the eFuse
+// MAC. Windows keys the device instance on it, so any difference would look like
+// new hardware and lose the user's per-device settings.
+extern "C" uint16_t const *tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
+    (void)langid;
+    static uint16_t desc[127];
+    static char serial[13];
+    const char *str;
+
+    if (index == 0) {
+        desc[0] = (TUSB_DESC_STRING << 8) | 4;
+        desc[1] = 0x0409;  // English (United States)
+        return desc;
+    }
+
+    switch (index) {
+        case 1:
+            str = USB.manufacturerName();
+            break;
+        case 2:
+            str = USB.productName();
+            break;
+        case 3:
+            if (serial[0] == '\0') {
+                static const char hex[] = "0123456789abcdef";
+                uint8_t mac[6] = {};
+                esp_efuse_mac_get_default(mac);
+                char *out = serial;
+                for (uint8_t i = 0; i < sizeof(mac); i++) {
+                    *out++ = hex[mac[i] >> 4];
+                    *out++ = hex[mac[i] & 0x0f];
+                }
+                *out = '\0';
+            }
+            str = serial;
+            break;
+        default:
+            // Interface + configuration strings: this is the whole point.
+            str = USB.productName();
+            break;
+    }
+
+    if (str == nullptr || *str == '\0') return nullptr;
+
+    uint8_t chr_count = strlen(str);
+    if (chr_count > 126) chr_count = 126;
+    for (uint8_t i = 0; i < chr_count; i++) {
+        desc[1 + i] = (uint16_t)str[i];
+    }
+    desc[0] = (TUSB_DESC_STRING << 8) | (2 * chr_count + 2);
+    return desc;
+}
+// Constructing USBCDC is what enables the CDC interface, making this a composite
+// HID + CDC device, so the instance must exist before CommManager::setup_joystick()
+// calls USB.begin(). A global is right here because this build always wants CDC;
+// GripController heap-allocates its equivalent only in cal mode, precisely to keep
+// its normal boot non-composite.
+static USBCDC usb_cdc;
+
+// Re-implements ONLY the useful half of USBCDC's built-in reboot behaviour.
+//
+// The core gates two separate triggers behind the same reboot_enable flag:
+//   1. _onLineState() watches a DTR/RTS sequence
+//        (!dtr,rts) -> (dtr,rts) -> (dtr,!rts) -> (!dtr,!rts)
+//      and drops into the bootloader at the end of it. An ordinary host opening
+//      and closing the port can walk exactly that sequence, so starting or
+//      stopping SimHub -- or any connect/disconnect on the VCP -- sent the board
+//      into boot mode. Unusable.
+//   2. _onLineCoding() reboots on a line-coding change to 1200 baud. That is the
+//      esptool / "1200bps touch" convention and the only way to get this board
+//      into download mode once the app owns the USB PHY (USB-Serial-JTAG is not
+//      enumerated then).
+//
+// enableReboot(false) disables both, so trigger 2 is reinstated here: with the
+// flag off the core still posts LINE_CODING_EVENT for a 1200 baud open, and we
+// act on it ourselves.
+static void on_cdc_line_coding(void *, esp_event_base_t, int32_t, void *event_data) {
+    auto *data = static_cast<arduino_usb_cdc_event_data_t *>(event_data);
+    if (data != nullptr && data->line_coding.bit_rate == 1200) {
+        usb_persist_restart(RESTART_BOOTLOADER);
+    }
+}
+#endif
+
+/**********************************************************************************************/
 /**********************************************************************************************/
 /*                                                                                            */
 /*                         RGB LED                                                            */
 /*                                                                                            */
 /**********************************************************************************************/
 #ifdef RGB_LED
-    #include <NeoPixelBus.h>
-NeoPixelBus<NeoGrbFeature, NeoWs2812xMethod> pixels(NUM_LEDS, RGB_LED);
+// NeoPixelBus is gone: it calls gpio_hal_iomux_func_sel, which IDF 5.5 removed,
+// and upstream master still does so -- there is no compatible release. This
+// board drives exactly one status pixel, which the core's own neopixelWrite
+// (esp32-hal-rgb-led) handles identically on both core 2.x and 3.x. The shim
+// keeps the old call shape so the call sites below are unchanged.
+struct RgbColor {
+    uint8_t R, G, B;
+    constexpr RgbColor(uint8_t r, uint8_t g, uint8_t b) : R(r), G(g), B(b) {}
+};
+
+class StatusPixel {
+  public:
+    explicit StatusPixel(uint8_t pin) : _pin(pin) {}
+    void Begin() {}
+    void SetPixelColor(uint16_t, const RgbColor &color) { _color = color; }
+    void Show() { neopixelWrite(_pin, _color.R, _color.G, _color.B); }
+
+  private:
+    uint8_t _pin;
+    RgbColor _color{0, 0, 0};
+};
+
+StatusPixel pixels(RGB_LED);
 const RgbColor k_yellow = RgbColor(46, 34, 0);
 const RgbColor k_green = RgbColor(0, 46, 0);
 const RgbColor k_red = RgbColor(46, 0, 0);
@@ -289,7 +428,44 @@ void setup() {
 
 #if PCB_VERSION == 6
     Serial.setTxTimeoutMs(0);
+#elif PROTOCOL_OVER_USB_CDC
+    // UART0 -> CH343 is now the diagnostic/panic console only. 115200 is not a
+    // free choice: the shipped sdkconfig fixes the IDF console at
+    // CONFIG_ESP_CONSOLE_UART_NUM=0 / CONFIG_ESP_CONSOLE_UART_BAUDRATE=115200,
+    // which is the rate the bootloader and the panic handler emit at. Matching
+    // it keeps the boot line and a crash backtrace readable in one terminal
+    // session. (CONFIG_ESP_CONSOLE_SECONDARY_USB_SERIAL_JTAG is moot -- that
+    // peripheral shares the PHY with the USB-OTG core TinyUSB owns, so UART0 is
+    // the only crash channel left.) The old 3 Mbaud served protocol bandwidth,
+    // which this port no longer carries.
+    Serial.begin(115200);
+
+    // The protocol runs on usb_cdc. It is brought up here, but USB.begin() is
+    // deliberately NOT called yet -- that happens in CommManager::setup_joystick(),
+    // once the config manager knows whether this board is a gateway or an axis,
+    // because the VID/PID/product name derive from that ID and ESPUSB's setters
+    // are no-ops once USB has started.
+    //
+    // That is exactly why ARDUINO_USB_CDC_ON_BOOT must stay 0: with it set, the
+    // core calls USB.begin() from app_main before setup() runs, silently freezing
+    // the identity at the compile-time defaults -- every board then enumerates as
+    // gateway 1 / "DiyFfbPedal" regardless of its configured ID.
+    //
+    // setTxTimeoutMs(0): with a host connected but not draining, USBCDC::write
+    // busy-spins up to tx_timeout_ms (250 ms default) while SerialManagerTask
+    // holds the write mutex. Non-blocking turns a stalled host into a dropped
+    // frame instead of a 250 ms hitch. An unopened port is already safe -- write()
+    // bails on !tud_cdc_n_connected, which tracks the host's DTR line.
+    usb_cdc.setTxTimeoutMs(0);
+    usb_cdc.setRxBufferSize(1024);  // match SerialManager::kSerialRxBufferSize
+    usb_cdc.setTimeout(5);
+    // Order matters: disable the built-in triggers, then register our own 1200
+    // baud handler, before begin() brings the interface up.
+    usb_cdc.enableReboot(false);
+    usb_cdc.onEvent(ARDUINO_USB_CDC_LINE_CODING_EVENT, on_cdc_line_coding);
+    usb_cdc.begin();
 #else
+    // UART0 -> CH343 carries the protocol; here the baud rate is real.
     Serial.setRxBufferSize(1024);
     Serial.setTimeout(5);
     Serial.begin(3000000);
@@ -321,18 +497,33 @@ void setup() {
             rr == ESP_RST_WDT      ? "WDT" :
             rr == ESP_RST_BROWNOUT ? "BROWNOUT" :
             rr == ESP_RST_DEEPSLEEP ? "DEEPSLEEP" : "OTHER";
-        Serial.printf("Boot: v%s part=%s ota_state=%s reset_reason=%s(%d)",
+        // Serial is deliberately the right target on every board: with
+        // ARDUINO_USB_CDC_ON_BOOT=0 (this board, and -core2) it is UART0 -> CH343,
+        // the diagnostic/panic console; on the CDC-on-boot boards (PCB 6/7/8/12)
+        // it is their USB CDC console, which for a board with no UART bridge is
+        // the only place this line can be read at all.
+        Serial.printf("Boot: v%s part=%s ota_state=%s reset_reason=%s(%d)\n",
                           VERSION, running ? running->label : "?", state_str, rr_str, (int)rr);
     }
 
     CommManager::CANConfig can_config = {.baud_rate = 1000, .tx_pin = CAN_TX, .rx_pin = CAN_RX};
 
+    // Which stream carries the protocol. On the native-USB build that is the CDC
+    // interface; Serial stays on UART0 as the diagnostic console. SerialManager
+    // only needs a Stream*, so this is the whole difference between the two
+    // transports. Writes before USB.begin() simply return 0 (no host yet).
+#if PROTOCOL_OVER_USB_CDC
+    Stream *protocol_stream = &usb_cdc;
+#else
+    Stream *protocol_stream = &Serial;
+#endif
+
 #ifdef HAS_GRIP_SPI
     static GripReader gripReader;
     gripReader.setup(GRIP_CS, GRIP_SCK, GRIP_MISO, GRIP_BYTES);
-    comm_manager.setup(&Serial, can_config, &config_manager, on_ffb_action, on_axis_action, on_dds_sync, &gripReader);
+    comm_manager.setup(protocol_stream, can_config, &config_manager, on_ffb_action, on_axis_action, on_dds_sync, &gripReader);
 #else
-    comm_manager.setup(&Serial, can_config, &config_manager, on_ffb_action, on_axis_action, on_dds_sync);
+    comm_manager.setup(protocol_stream, can_config, &config_manager, on_ffb_action, on_axis_action, on_dds_sync);
 #endif
     comm_manager.set_ota_state_callback(on_ota_state_change);
 

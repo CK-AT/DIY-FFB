@@ -646,7 +646,7 @@ bool CANManager::send_payload_to_gateway(const uint8_t *data, uint32_t len) {
     return ret == ISOTP_RET_OK;
 }
 
-bool CANManager::send_message_to_gateway(const Message &message, const uint8_t *raw_data, uint32_t len_raw_data) {
+bool CANManager::send_message_to_gateway(const Message &message, const uint8_t *raw_data, size_t len_raw_data) {
     if (message.which_payload == Message_axis_log_message_tag) {
         _last_log_ack_received = false;
         ti_last_log_sent = micros();
@@ -893,7 +893,7 @@ bool CANManager::send_flight_ffb(const FFBAction &action) {
     return base_ok && load_ok && vib_ok;
 }
 
-bool CANManager::send_message_to_axis(AxisID axis_id, const Message &message, const uint8_t *raw_data, uint32_t len_raw_data) {
+bool CANManager::send_message_to_axis(AxisID axis_id, const Message &message, const uint8_t *raw_data, size_t len_raw_data) {
     switch (message.which_payload) {
         case Message_ffb_action_tag:
             if ((message.payload.ffb_action.which_function == FFBAction_automotive_pedal_tag) &&
