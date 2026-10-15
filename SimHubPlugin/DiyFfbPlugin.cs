@@ -1026,8 +1026,53 @@ namespace DiyFfb
 
         public bool PortExists(string portName)
         {
-            string[] portNames = SerialPort.GetPortNames();
-            return Array.Exists(portNames, name => name.Equals(portName, StringComparison.OrdinalIgnoreCase));
+            return UsbDeviceScanner.IsPresent(portName);
+        }
+
+        /// <summary>
+        /// The COM port the gateway is on right now, or null if it isn't present.
+        /// A gateway saved by USB identity is looked up by PID, so a renumbered
+        /// port is followed (and ESPNow_port updated); a stale COM name is never
+        /// opened in its place.
+        /// </summary>
+        public string ResolveGatewayPort()
+        {
+            if (Settings == null)
+            {
+                return null;
+            }
+
+            if (Settings.GatewayUsbIndex >= 0)
+            {
+                UsbPort gateway = UsbDeviceScanner.FindGateway(Settings.GatewayUsbIndex);
+                if (gateway == null)
+                {
+                    return null;
+                }
+                Settings.ESPNow_port = gateway.Com;
+                return gateway.Com;
+            }
+
+            string portName = Settings.ESPNow_port;
+            if (string.IsNullOrWhiteSpace(portName) || portName == "NA")
+            {
+                return null;
+            }
+
+            UsbPort port = UsbDeviceScanner.GetPorts()
+                .FirstOrDefault(p => string.Equals(p.Com, portName, StringComparison.OrdinalIgnoreCase));
+            if (port == null)
+            {
+                return null;
+            }
+
+            // A COM name saved before identity tracking that turns out to be a
+            // DIY-FFB gateway: remember the gateway from now on.
+            if (port.Role == UsbPortRole.Gateway)
+            {
+                Settings.GatewayUsbIndex = port.Index;
+            }
+            return portName;
         }
 
         private void StartGatewayAutoReconnect()
@@ -4440,13 +4485,15 @@ namespace DiyFfb
                 return;
             }
 
-            string portName = Settings.ESPNow_port;
-            if (string.IsNullOrWhiteSpace(portName) || portName == "NA")
+            // Connected to the saved port: nothing to do, and no WMI scan every tick.
+            if (ESPsync_serialPort != null && ESPsync_serialPort.IsOpen
+                && string.Equals(ESPsync_serialPort.PortName, Settings.ESPNow_port, StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
 
-            if (!PortExists(portName))
+            string portName = ResolveGatewayPort();
+            if (portName == null)
             {
                 return;
             }

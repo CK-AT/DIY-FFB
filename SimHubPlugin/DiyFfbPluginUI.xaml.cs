@@ -203,11 +203,19 @@ namespace DiyFfb
             UpdateVehicleTabHeader();
             RefreshVehicleParams();
 
-            if (Plugin.Settings.Pedal_ESPNow_auto_connect_flag
-                && !string.IsNullOrWhiteSpace(Plugin.Settings.ESPNow_port)
-                && SerialPort.GetPortNames().Any(port => string.Equals(port, Plugin.Settings.ESPNow_port, StringComparison.OrdinalIgnoreCase)))
+            if (TryAdoptSingleGateway())
             {
+                UpdateSerialPortList();
                 ConnectToPort(Plugin.Settings.ESPNow_port);
+            }
+            else if (Plugin.Settings.Pedal_ESPNow_auto_connect_flag)
+            {
+                string gatewayPort = Plugin.ResolveGatewayPort();
+                if (gatewayPort != null)
+                {
+                    UpdateSerialPortList();
+                    ConnectToPort(gatewayPort);
+                }
             }
 
             // Populate configs from stored baselines BEFORE selecting initial tabs,
@@ -309,10 +317,11 @@ namespace DiyFfb
                 attachedGatewayPort = Plugin.ESPsync_serialPort;
             }
 
-            if (SerialPortSelection_ESPNow != null && !string.IsNullOrWhiteSpace(portName))
+            UsbPort item = FindPortItem(portName);
+            if (item != null)
             {
                 suppressSerialPortSelectionChange = true;
-                SerialPortSelection_ESPNow.SelectedItem = portName;
+                SerialPortSelection_ESPNow.SelectedItem = item;
                 suppressSerialPortSelectionChange = false;
             }
 
@@ -377,10 +386,10 @@ namespace DiyFfb
 
         private void UpdateSerialPortList()
         {
-            List<string> ports = SerialPort.GetPortNames().Distinct().OrderBy(port => port).ToList();
+            List<UsbPort> ports = UsbDeviceScanner.GetPorts(forceRefresh: true).ToList();
             if (ports.Count == 0)
             {
-                ports.Add("NA");
+                ports.Add(new UsbPort("NA"));
             }
 
             if (SerialPortSelection_ESPNow == null)
@@ -391,11 +400,12 @@ namespace DiyFfb
             suppressSerialPortSelectionChange = true;
             SerialPortSelection_ESPNow.ItemsSource = ports;
 
-            if (Plugin != null && !string.IsNullOrWhiteSpace(Plugin.Settings.ESPNow_port) && ports.Contains(Plugin.Settings.ESPNow_port))
+            UsbPort saved = Plugin != null ? FindPortItem(Plugin.Settings.ESPNow_port) : null;
+            if (saved != null)
             {
-                SerialPortSelection_ESPNow.SelectedItem = Plugin.Settings.ESPNow_port;
+                SerialPortSelection_ESPNow.SelectedItem = saved;
             }
-            else if (ports.Count == 1 && ports[0] == "NA")
+            else if (ports.Count == 1 && ports[0].Com == "NA")
             {
                 SerialPortSelection_ESPNow.SelectedIndex = 0;
             }
@@ -404,6 +414,38 @@ namespace DiyFfb
                 SerialPortSelection_ESPNow.SelectedIndex = -1;
             }
             suppressSerialPortSelectionChange = false;
+        }
+
+        private UsbPort FindPortItem(string com)
+        {
+            if (string.IsNullOrWhiteSpace(com) || !(SerialPortSelection_ESPNow?.ItemsSource is IEnumerable<UsbPort> items))
+            {
+                return null;
+            }
+            return items.FirstOrDefault(p => string.Equals(p.Com, com, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// Nothing saved yet and exactly one DIY-FFB gateway plugged in: adopt it.
+        /// With several gateways the user picks; we don't guess.
+        /// </summary>
+        private bool TryAdoptSingleGateway()
+        {
+            if (Plugin == null || Plugin.Settings.GatewayUsbIndex >= 0 || !string.IsNullOrWhiteSpace(Plugin.Settings.ESPNow_port))
+            {
+                return false;
+            }
+
+            List<UsbPort> gateways = UsbDeviceScanner.GetPorts().Where(p => p.Role == UsbPortRole.Gateway).ToList();
+            if (gateways.Count != 1)
+            {
+                return false;
+            }
+
+            Plugin.Settings.GatewayUsbIndex = gateways[0].Index;
+            Plugin.Settings.ESPNow_port = gateways[0].Com;
+            SetDebugOutput($"Found gateway {gateways[0].Index} on {gateways[0].Com}.");
+            return true;
         }
 
         private void InitializeSystemSettings()
@@ -641,18 +683,19 @@ namespace DiyFfb
                 return;
             }
 
-            if (SerialPortSelection_ESPNow.SelectedItem is string portName)
+            if (SerialPortSelection_ESPNow.SelectedItem is UsbPort port)
             {
                 if (suppressSerialPortSelectionChange)
                 {
                     return;
                 }
-                if (string.IsNullOrWhiteSpace(portName) || portName == "NA")
+                if (string.IsNullOrWhiteSpace(port.Com) || port.Com == "NA")
                 {
                     return;
                 }
-                Plugin.Settings.ESPNow_port = portName;
-                SetDebugOutput($"Gateway port selected: {portName}");
+                Plugin.Settings.ESPNow_port = port.Com;
+                Plugin.Settings.GatewayUsbIndex = port.Role == UsbPortRole.Gateway ? port.Index : -1;
+                SetDebugOutput($"Gateway port selected: {port.Label}");
             }
         }
 
@@ -1155,9 +1198,9 @@ namespace DiyFfb
                 return;
             }
 
-            if (SerialPortSelection_ESPNow.SelectedItem is string portName)
+            if (SerialPortSelection_ESPNow.SelectedItem is UsbPort port)
             {
-                ConnectToPort(portName);
+                ConnectToPort(port.Com);
             }
         }
 

@@ -248,6 +248,10 @@ namespace DiyFfb
         public double kinematicDiagram_zeroPos_OY = 20;
         public double kinematicDiagram_zeroPos_scale = 1.5;
         public string ESPNow_port = "";
+        // Gateway identity from its USB PID (0x8210 + N). When >= 0, reconnect
+        // follows this gateway across COM renumbering; ESPNow_port is kept in sync.
+        // -1 = plain COM name (legacy boards / non-DIY-FFB ports).
+        public int GatewayUsbIndex = -1;
         public bool Pedal_ESPNow_auto_connect_flag = false;
         public bool Serial_auto_clean = false; //clean serial monitor
         public bool Serial_auto_clean_bridge = false; //clean serial monitor bridge

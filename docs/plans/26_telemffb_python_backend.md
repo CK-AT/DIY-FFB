@@ -116,13 +116,13 @@ ESP32 gateway → CAN → axis controller (unchanged)
   machinery.
 - The **wire codec**: our COBS + CRC16/Modbus framing (§4) and the vendored
   generated protobuf (§7).
-- **Serial port selection.** The protobuf link is a **UART bridge** — a generic
-  USB-serial COM port (Arduino `Serial` = UART0 @ 3 Mbaud, since
-  `ARDUINO_USB_CDC_ON_BOOT=0`). It is **not** the native-USB device, so it does
-  **not** carry a DIY-specific VID/PID; auto-detecting by `0x303b`/gateway-PID
-  would be wrong (that identity is the HID gamepad — see the note below).
-  Discovery is therefore **user-selected COM port** (as the SimHub plugin does),
-  with optional matching by the bridge chip's VID/PID as a convenience only.
+- **Serial port selection.** *(Updated 2026-10-15.)* Since 568246b1 the
+  default env (`a6-ffb-v10-ck-at`) carries the protobuf link over the
+  **native USB CDC** interface of the composite device, so the COM port **does**
+  carry the DIY identity: VID `0x303b`, PID `0x8210 + gateway_id`. Auto-detect by
+  that VID/PID, as the SimHub plugin now does (Plan 29,
+  [UsbDeviceScanner.cs](../../SimHubPlugin/UsbDeviceScanner.cs)). Keep a manual
+  COM-port override for legacy envs that still use a UART bridge.
 - The single application branch point: a device-backend selector at
   [`main.py:360`](../../../VPforce-TelemFFB/main.py) plus a CLI/system-setting
   flag choosing the DIY backend and COM port.
@@ -148,15 +148,16 @@ ESP32 gateway → CAN → axis controller (unchanged)
 
 ## 4. Wire contract the backend must implement
 
-> **Two distinct USB interfaces — don't conflate them.** The gateway exposes
-> (1) a **native-USB HID gamepad** and (2) a **UART-bridge serial COM port**.
-> The runtime source of truth for the HID identity is
+> **USB identity.** *(Updated 2026-10-15; this note previously described the
+> pre-568246b1 UART-bridge transport.)* The gateway is a composite USB device:
+> HID gamepad on `MI_00`, protobuf CDC on `MI_01`, both under one identity set
+> at runtime in
 > [`CommManager.cpp:114-127`](../../ESP32/src/CommManager.cpp#L114) (it
 > **overrides** the platformio `USB_PRODUCT`/`USB_PID` defines): VID `0x303b`,
 > PID `0x8210 + gateway_id` (gw1 = `0x8211`) / `0x8220 + axis_id`, product
-> `"DIY-FFB-Gateway-N"` / `"DIY-FFB-Axis-N"`. **This backend uses neither** — it
-> talks protobuf over the *UART-bridge* COM port (a separate, generic
-> USB-serial device). The `0x303b` identity is the HID gamepad only.
+> `"DIY-FFB-Gateway-N"` / `"DIY-FFB-Axis-N"`. The backend talks protobuf over
+> the CDC COM port. On PCB 13 the CH343 UART bridge carries only the 115200
+> boot/panic console, not protocol traffic.
 
 Confirmed against the SimHub plugin ([FrameSerial.cs](../../SimHubPlugin/FrameSerial.cs),
 [DiyFfbPlugin.cs:100](../../SimHubPlugin/DiyFfbPlugin.cs#L100)) and firmware
