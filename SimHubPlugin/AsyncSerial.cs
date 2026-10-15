@@ -36,6 +36,22 @@ namespace ProtbufTest
             _auto_reconnect=auto_reconnect;
             try
             {
+                // DTR must be asserted for the native-USB build. The firmware's
+                // USBCDC::write bails out on !tud_cdc_n_connected(), and TinyUSB
+                // derives "connected" from the DTR line alone -- so with .NET's
+                // default DtrEnable=false the device silently discards every byte
+                // and the port looks dead. Irrelevant over the old CH343 UART
+                // bridge, which is why this was never needed before.
+                //
+                // Set before Open() so it is applied as part of the open, leaving
+                // no window where the device considers the host absent.
+                //
+                // RTS is deliberately NOT touched. USBCDC::_onLineState runs the
+                // esptool reset state machine over DTR/RTS transitions --
+                // (!dtr,rts) -> (dtr,rts) -> (dtr,!rts) -> (!dtr,!rts) reboots the
+                // chip into the bootloader. Raising DTR alone cannot walk that
+                // sequence; raising both would sit one transition away from it.
+                port.DtrEnable = true;
                 port.Open();
                 cts.Cancel();
                 cts = new CancellationTokenSource();
