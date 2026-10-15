@@ -50,6 +50,9 @@
     <Compile Include="..\Flasher\FirmwarePackage.cs">
       <Link>Flasher\FirmwarePackage.cs</Link>
     </Compile>
+    <Compile Include="..\Flasher\PublishedFirmware.cs">
+      <Link>Flasher\PublishedFirmware.cs</Link>
+    </Compile>
     <Compile Include="..\Flasher\Esp32S3Flasher.cs">
       <Link>Flasher\Esp32S3Flasher.cs</Link>
     </Compile>

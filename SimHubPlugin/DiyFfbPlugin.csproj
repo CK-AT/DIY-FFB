@@ -296,6 +296,7 @@
     <Compile Include="Flasher\EspRomLoader.cs" />
     <Compile Include="Flasher\FirmwareImage.cs" />
     <Compile Include="Flasher\FirmwarePackage.cs" />
+    <Compile Include="Flasher\PublishedFirmware.cs" />
     <Compile Include="CubicSpline.cs" />
     <Compile Include="DiyFfbPlugin.cs" />
     <Compile Include="DiyFfbPluginSettings.cs" />

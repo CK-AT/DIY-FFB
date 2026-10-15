@@ -19,6 +19,7 @@ FlasherTool selftest  <package.ffbota>
 FlasherTool flash     <COMx> <package.ffbota> [--erase-nvs] [--baud N]
 FlasherTool erase-nvs <COMx> [--package package.ffbota]
 FlasherTool cycle     <COMx> <a.ffbota> <b.ffbota> [count]   (alternate a/b, default 20)
+FlasherTool published [update_info.json URL] [board]   (list; with board: download + check)
 
 <COMx> may be a running DIY-FFB device (1200 bps touch), the S3 bootloader
 port (303A:1001), or a USB-UART bridge with auto-program wiring.";
@@ -33,13 +34,14 @@ port (303A:1001), or a USB-UART bridge with auto-program wiring.";
                     case "selftest" when args.Length >= 2: return SelfTest(args[1]);
                     case "flash" when args.Length >= 3: return Flash(args);
                     case "cycle" when args.Length >= 4: return Cycle(args);
+                    case "published": return Published(args);
                     case "erase-nvs" when args.Length >= 2: return EraseNvs(args);
                     default:
                         Console.Error.WriteLine(Usage);
                         return 2;
                 }
             }
-            catch (Exception ex) when (ex is EspRomException || ex is IOException || ex is TimeoutException
+            catch (Exception ex) when (ex is EspRomException || ex is IOException || ex is TimeoutException || ex is System.Net.WebException
                                        || ex is InvalidDataException || ex is UnauthorizedAccessException)
             {
                 Console.Error.WriteLine();
@@ -182,6 +184,36 @@ port (303A:1001), or a USB-UART bridge with auto-program wiring.";
             Console.WriteLine();
             Console.WriteLine($"{count}/{count} cycles OK. Per flash: min {times.Min():F1} s, " +
                               $"avg {times.Average():F1} s, max {times.Max():F1} s.");
+            return 0;
+        }
+
+        // Same default as the plugin's OTA dialog.
+        private const string DefaultInfoUrl = "https://github.com/CK-AT/DIY-FFB/raw/refs/heads/main/OTA/update_info.json";
+
+        private static int Published(string[] args)
+        {
+            string infoUrl = args.Length >= 2 ? args[1] : DefaultInfoUrl;
+            IReadOnlyList<PublishedFirmware> boards = PublishedFirmware.List(infoUrl);
+            foreach (PublishedFirmware fw in boards)
+            {
+                Console.WriteLine($"{fw.Board,-24} v{fw.Version,-8} {fw.PackageUrl ?? "(no package: URL is not a .bin)"}");
+            }
+            if (args.Length < 3)
+            {
+                return 0;
+            }
+
+            PublishedFirmware chosen = boards.FirstOrDefault(b => string.Equals(b.Board, args[2], StringComparison.OrdinalIgnoreCase));
+            if (chosen == null)
+            {
+                Console.Error.WriteLine($"Board '{args[2]}' is not listed.");
+                return 1;
+            }
+
+            var sw = Stopwatch.StartNew();
+            FirmwarePackage package = chosen.Download();
+            Console.WriteLine($"Downloaded and verified {package.Board} v{package.Version} in {sw.Elapsed.TotalSeconds:F1} s " +
+                              $"(firmware MD5 {package.FirmwareMd5} matches update_info.json).");
             return 0;
         }
 

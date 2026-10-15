@@ -19,6 +19,9 @@ namespace DiyFfb.Flasher
         public string Board { get; }
         public string BuildEnv { get; }
         public string Chip { get; }
+
+        /// <summary>MD5 of the package's firmware.bin, as published in update_info.json.</summary>
+        public string FirmwareMd5 { get; }
         public FirmwareImage Image { get; }
 
         private FirmwarePackage(Manifest manifest, FirmwareImage image)
@@ -27,6 +30,7 @@ namespace DiyFfb.Flasher
             Board = manifest.Board ?? string.Empty;
             BuildEnv = manifest.BuildEnv ?? string.Empty;
             Chip = manifest.Chip ?? string.Empty;
+            FirmwareMd5 = manifest.Md5 ?? string.Empty;
             Image = image;
         }
 
@@ -83,6 +87,7 @@ namespace DiyFfb.Flasher
             [DataMember(Name = "board")] public string Board { get; set; }
             [DataMember(Name = "build_env")] public string BuildEnv { get; set; }
             [DataMember(Name = "chip")] public string Chip { get; set; }
+            [DataMember(Name = "md5")] public string Md5 { get; set; }
             [DataMember(Name = "factory_md5")] public string FactoryMd5 { get; set; }
         }
     }
