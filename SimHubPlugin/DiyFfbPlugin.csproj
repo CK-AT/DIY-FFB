@@ -292,6 +292,10 @@
     </Compile>
     <Compile Include="Tools.cs" />
     <Compile Include="UsbDeviceScanner.cs" />
+    <Compile Include="Flasher\Esp32S3Flasher.cs" />
+    <Compile Include="Flasher\EspRomLoader.cs" />
+    <Compile Include="Flasher\FirmwareImage.cs" />
+    <Compile Include="Flasher\FirmwarePackage.cs" />
     <Compile Include="CubicSpline.cs" />
     <Compile Include="DiyFfbPlugin.cs" />
     <Compile Include="DiyFfbPluginSettings.cs" />

@@ -203,6 +203,10 @@ appears. PCB 13's CH343 **has the DTR/RTS→EN/IO0 auto-program wiring**
 - Hold BOOT + replug (ROM on `303A:1001`) stays the last resort for boards
   without a CH343.
 
+**Validated 2026-10-15:** `FlasherTool` flashed PCB 13 back and forth between two
+versions both via the native CDC (1200 bps touch → `303A:1001`) and via the
+CH343 (classic reset, 921600), with the NVS MD5 unchanged across each flash.
+
 Caveat: the CH343 port must not be held open by anything else (a serial monitor
 on the console). Opening it with the wrong DTR/RTS state resets the chip, so
 the scanner and plugin must never open it implicitly.
@@ -222,38 +226,51 @@ MD5-checked artifact per env: `OTA/firmware_<env>.ffbota`
 ([ota_package_post.py](../../ESP32/scripts/ota_package_post.py)), today
 `manifest.json` + `firmware.bin` only.
 
-**Extend the package** (format stays backward-compatible; OTA ignores the new
-entries):
-- add `bootloader.bin`, `partitions.bin`, `boot_app0.bin` (from
-  `framework-arduinoespressif32/tools/partitions/`)
-- manifest gains `chip: "esp32s3"`, `flash_size: "8MB"`, and a `segments` list
-  `[{file, offset, md5}]`
+**Extend the package** with the merged factory image (implemented; format
+stays backward-compatible, OTA reads entries by name and ignores the new one):
+- add `firmware.factory.bin`: pioarduino's `esp32_create_combined_bin`
+  post-action on `firmware.bin` (bootloader + partitions + boot_app0 + app,
+  merged at `0x0`). It runs before our `buildprog` post-action.
+- the packager only includes it when the image's app part at
+  `$ESP32_APP_OFFSET` is byte-identical to `firmware.bin` and ends with it, so a
+  stale merge is never shipped. Platform 6.9.0 envs (core 2.0.17) produce no
+  factory image; their packages stay OTA-only.
+- manifest gains `chip` (`build.mcu`), `factory_md5`, `factory_size`.
 
-Flasher accepts a local `.ffbota` or fetches one listed in `update_info.json`
-(same URL the OTA dialog uses). One artifact serves OTA and USB. The DLL stays
-small, and the plugin build no longer has to run after PlatformIO.
+One file instead of four: no `boot_app0.bin` lookup in the framework dir, and
+the segment split is derived on the flasher side (§5.1).
 
-### 5.1 Segment layout — and two traps
+Flasher accepts a local `.ffbota` or fetches the published one. One artifact
+serves OTA and USB. The DLL stays small, and the plugin build no longer has to
+run after PlatformIO.
+
+**`update_info.json` is not touched.** The ESP32 downloads it itself during OTA
+and pulls the `.bin` its entry points to, so its schema and URLs stay
+ESP32-facing. The plugin finds the board's entry (same info URL as the OTA
+dialog) and derives the package URL by convention: the packager publishes
+`firmware_<env>.ffbota` next to `firmware_<env>.bin` in `OTA/`, so swap the
+extension. A 404 there means that board has no USB-flashable package.
+
+### 5.1 Segments — and two traps
 Verified on the current `a6-ffb-v10-ck-at` build; `partitions.bin` decoded:
 nvs `0x9000/0x5000`, otadata `0xE000/0x2000`, app0 `0x10000`, app1 `0x340000`,
-spiffs `0x670000`, coredump `0x7F0000`.
-
-| Offset | File | Note |
-|---|---|---|
-| `0x0` | bootloader.bin | header `E9 03 02 3F` (DIO hdr, 8 MB, 80 MHz) — write unmodified; MD5-verify |
-| `0x8000` | partitions.bin | |
-| `0xE000` | boot_app0.bin | otadata, `ota_seq=1` ⇒ boot app0 |
-| `0x10000` | firmware.bin | |
+spiffs `0x670000`, coredump `0x7F0000`. The factory image is the four parts
+merged at `0x0` (verified byte-identical); bootloader header `E9 03 02 3F`
+(DIO hdr, 8 MB, 80 MHz) is written unmodified and MD5-verified.
 
 - **Trap 1: otadata must always be written.** After any OTA the device may run
   from `app1`. Writing only `0x10000` would leave otadata pointing at app1 ⇒
   the *old* image keeps booting and the flash "didn't work".
-- **Trap 2: `firmware.factory.bin` wipes the config.** It's the four segments
-  merged at `0x0` (verified byte-identical), and its gap `0x9000–0xE000` is all
-  `0xFF`, i.e. **writing it erases NVS = the stored `config` Preferences
-  namespace** ([ConfigManager.cpp:116](../../ESP32/src/ConfigManager.cpp#L116)).
-  So: default **Update** = write segments individually (NVS preserved);
-  **Factory reset** = segments + NVS erase.
+- **Trap 2: the factory image wipes the config.** Its gap `0x9000–0xE000` is
+  all `0xFF`, i.e. **writing it whole erases NVS = the stored `config`
+  Preferences namespace** ([ConfigManager.cpp:116](../../ESP32/src/ConfigManager.cpp#L116)).
+
+So the flasher ([FirmwareImage.cs](../../SimHubPlugin/Flasher/FirmwareImage.cs))
+reads the NVS range from the partition table *inside the image* and splits
+around it: **Update** writes `[0x0, nvs)` and `[nvs_end, end)` (otadata
+included, config kept); **Factory reset** writes the image whole. Taking the
+range from the image means a future partition-table change can't silently
+start wiping configs.
 
 ### 5.2 "Reset config" (NVS erase)
 `ERASE_REGION` is stub-only. ROM equivalent: `FLASH_DEFL_BEGIN` on
@@ -277,11 +294,11 @@ check. Same code path as a normal write.
 | Phase | Scope | Exit criterion |
 |---|---|---|
 | **1** | `UsbDeviceScanner` + dropdown labels + `GatewayTarget` reconnect + first-run auto-select | renumber the COM port in Device Manager → plugin still reconnects |
-| **2** | `Esp32RomFlasher` core (SLIP, commands, zlib, watchdog disable, MD5) + a desk test harness/console (no UI) | flash a PlatformIO build to PCB 13 via `303A:1001`; `esptool read-flash` + MD5 match; device boots the new version |
+| **2** ✅ | ROM flasher core (`SimHubPlugin/Flasher/`: SLIP, commands, zlib, watchdog disable, MD5) + factory image in `.ffbota` + desk harness `FlasherTool` (no UI) | `.ffbota` from `pio run` flashes PCB 13; `esptool verify-flash` matches; device boots the new version with its config intact |
 | **3** | entry/reset/re-resolution (§4.3), retries, gateway yield (§4.5), force-download clear | 20× touch→flash→boot cycles from the running app with no manual intervention |
-| **4** | `.ffbota` segment extension + `update_info.json` fetch | `.ffbota` from `pio run` flashes via plugin; OTA of the same package still works |
+| **4** | fetch the board's published `.ffbota` (URL derived from its `update_info.json` `.bin` URL; file unchanged; packaging itself moved to phase 2) | latest published package flashes via plugin; OTA of the same package still works |
 | **5** | Dialog UI, multi-device, factory reset | flash gateway + axis in one go; factory reset clears config |
-| **6** | CH343 recovery path (§4.4) | flash a deliberately bootlooping image away over the CH343, hands-off |
+| **6** | CH343 recovery path (§4.4) — transport already validated in phase 2; remains: auto-offer in the dialog | flash a deliberately bootlooping image away over the CH343, hands-off |
 | **7** (opt.) | stub loader, only if ROM throughput is too slow | — |
 
 Phase 1 is independent and useful on its own; ship it first.

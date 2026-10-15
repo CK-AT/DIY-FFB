@@ -55,6 +55,16 @@ def _resolve_board_name(env, project_dir: Path) -> str:
     return env.subst("$BOARD")
 
 
+def _factory_matches(factory_path: Path, firmware_path: Path, env) -> bool:
+    if not factory_path.exists():
+        return False
+    app_offset = int(env.subst("$ESP32_APP_OFFSET") or "0x10000", 0)
+    firmware = firmware_path.read_bytes()
+    with factory_path.open("rb") as handle:
+        handle.seek(app_offset)
+        return handle.read(len(firmware) + 1) == firmware
+
+
 def _write_ffbota(source, target, env):
     if env.subst("$PIOENV") == "native":
         return
@@ -89,9 +99,23 @@ def _write_ffbota(source, target, env):
         "firmware_name": firmware_path.name,
     }
 
+    # The merged factory image (bootloader + partitions + otadata + app at 0x0)
+    # is what the plugin's USB flasher writes (Plan 29). Only packaged when its
+    # app part is this exact firmware.bin, so a stale merge is never shipped.
+    factory_path = build_dir / "firmware.factory.bin"
+    factory_ok = _factory_matches(factory_path, firmware_path, env)
+    if factory_ok:
+        manifest["chip"] = env.BoardConfig().get("build.mcu", "")
+        manifest["factory_md5"] = _compute_md5(factory_path)
+        manifest["factory_size"] = factory_path.stat().st_size
+    elif factory_path.exists():
+        print(f"[ffbota] {factory_path.name} does not contain this firmware.bin; package is OTA-only")
+
     with zipfile.ZipFile(output_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         archive.writestr("manifest.json", json.dumps(manifest, indent=2, sort_keys=True))
         archive.write(firmware_path, "firmware.bin")
+        if factory_ok:
+            archive.write(factory_path, "firmware.factory.bin")
 
     print(f"[ffbota] wrote {output_path}")
 
