@@ -469,7 +469,32 @@ void CANManager::update_timeouts(uint32_t now) {
 }
 
 void CANManager::shared_setup(uint16_t baud_rate, int8_t tx_pin, int8_t rx_pin) {
-    ESP32Can.begin(ESP32Can.convertSpeed(baud_rate), tx_pin, rx_pin, 40, 40);
+    // Explicit bit timing instead of TWAI_TIMING_CONFIG_*(), because the macro's
+    // value changed underneath us on the IDF 5.1 -> 5.5 move and silently halved
+    // the timing margin at 1 Mbit:
+    //
+    //   IDF 5.1 (ESP32-S3): brp=4  -> 20 TQ/bit, tseg 15/4, sjw=3, 80% sample
+    //   IDF 5.5 (ESP32-S3):          8 TQ/bit, tseg  5/2, sjw=1, 75% sample
+    //
+    // 8 TQ with SJW=1 leaves almost nothing for transceiver loop delay and
+    // oscillator tolerance, which showed up as a high bit-error rate on the axes
+    // (TEC climbing to BUS_OFF, bus_err in the hundreds per second) on otherwise
+    // unchanged, correctly terminated wiring with millimetre stubs.
+    //
+    // Pinning it here also keeps nodes on older firmware interoperable, since
+    // this restores exactly what they use, and makes the bus immune to the macro
+    // changing again on a future core bump.
+    twai_timing_config_t t_config = {};
+    t_config.clk_src = TWAI_CLK_SRC_DEFAULT;
+    t_config.quanta_resolution_hz = (uint32_t)baud_rate * 1000 * 20;  // 20 TQ per bit
+    t_config.brp = 0;                                                 // derived from quanta_resolution_hz
+    t_config.prop_seg = 0;
+    t_config.tseg_1 = 15;
+    t_config.tseg_2 = 4;
+    t_config.sjw = 3;
+    t_config.ssp_offset = 0;
+    t_config.triple_sampling = false;
+    ESP32Can.begin(ESP32Can.convertSpeed(baud_rate), tx_pin, rx_pin, 40, 40, nullptr, nullptr, &t_config);
     isotp_init_link(&(gateway_isotp_state.link), 0x710 + own_axis_index, gateway_isotp_state.isotp_link_tx_buff, sizeof(IsotpState::isotp_link_tx_buff),
                     gateway_isotp_state.isotp_link_rx_buff, sizeof(IsotpState::isotp_link_rx_buff));
     isotp_init_link(&(outbound_logging_isotp_state.link), 0x730 + own_axis_index, outbound_logging_isotp_state.isotp_link_tx_buff, sizeof(IsotpStateOutboundLogging::isotp_link_tx_buff),
