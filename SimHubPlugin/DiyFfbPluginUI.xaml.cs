@@ -292,6 +292,20 @@ namespace DiyFfb
             return null;
         }
 
+        /// <summary>The plugin released the gateway port (USB flash); show it as disconnected.</summary>
+        public void NotifyGatewayPortClosed()
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(new Action(NotifyGatewayPortClosed));
+                return;
+            }
+
+            Label_Status.Text = "Disconnected";
+            btn_connect_espnow_port.Content = "Connect";
+            SetDebugOutput("Gateway port released for USB flashing.");
+        }
+
         public void NotifyGatewayPortAutoConnected(string portName)
         {
             if (!Dispatcher.CheckAccess())

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -17,6 +18,7 @@ namespace DiyFfb.FlasherTool
 FlasherTool selftest  <package.ffbota>
 FlasherTool flash     <COMx> <package.ffbota> [--erase-nvs] [--baud N]
 FlasherTool erase-nvs <COMx> [--package package.ffbota]
+FlasherTool cycle     <COMx> <a.ffbota> <b.ffbota> [count]   (alternate a/b, default 20)
 
 <COMx> may be a running DIY-FFB device (1200 bps touch), the S3 bootloader
 port (303A:1001), or a USB-UART bridge with auto-program wiring.";
@@ -30,6 +32,7 @@ port (303A:1001), or a USB-UART bridge with auto-program wiring.";
                     case "list": return List();
                     case "selftest" when args.Length >= 2: return SelfTest(args[1]);
                     case "flash" when args.Length >= 3: return Flash(args);
+                    case "cycle" when args.Length >= 4: return Cycle(args);
                     case "erase-nvs" when args.Length >= 2: return EraseNvs(args);
                     default:
                         Console.Error.WriteLine(Usage);
@@ -139,8 +142,46 @@ port (303A:1001), or a USB-UART bridge with auto-program wiring.";
 
             var sw = Stopwatch.StartNew();
             var flasher = new Esp32S3Flasher(Log) { Progress = PrintProgress };
-            flasher.Flash(args[1], image, options);
+            string backOn = flasher.Flash(args[1], image, options);
+            if (backOn != null)
+            {
+                Console.WriteLine($"Board is on {backOn}.");
+            }
             Console.WriteLine($"Done in {sw.Elapsed.TotalSeconds:F1} s.");
+            return 0;
+        }
+
+        /// <summary>
+        /// Plan 29 phase 3 exit test: flash a, b, a, b, ... from the running app
+        /// with no hands on the board, following it across COM renumbering.
+        /// </summary>
+        private static int Cycle(string[] args)
+        {
+            FirmwareImage[] images = { LoadPackage(args[2]), LoadPackage(args[3]) };
+            int count = args.Length >= 5 ? int.Parse(args[4]) : 20;
+            string port = args[1];
+            var times = new List<double>();
+
+            for (int i = 0; i < count; i++)
+            {
+                Console.WriteLine();
+                Console.WriteLine($"=== Cycle {i + 1}/{count}: {(i % 2 == 0 ? "a" : "b")} via {port} ===");
+                var sw = Stopwatch.StartNew();
+                var flasher = new Esp32S3Flasher(Log) { Progress = PrintProgress };
+                string backOn = flasher.Flash(port, images[i % 2], new FlashOptions());
+                times.Add(sw.Elapsed.TotalSeconds);
+
+                // Null over a UART bridge (stable COM) or if the board didn't
+                // re-enumerate; then the next cycle fails loudly on the old port.
+                if (backOn != null)
+                {
+                    port = backOn;
+                }
+            }
+
+            Console.WriteLine();
+            Console.WriteLine($"{count}/{count} cycles OK. Per flash: min {times.Min():F1} s, " +
+                              $"avg {times.Average():F1} s, max {times.Max():F1} s.");
             return 0;
         }
 

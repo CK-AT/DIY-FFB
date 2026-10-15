@@ -185,10 +185,13 @@ the atomic Unix variant isn't available on Windows either).
 
 (T/F = .NET `DtrEnable`/`RtsEnable`.)
 
-**Retries:** up to 3 attempts on *connection* errors only (sync timeout, open
-failure, lost port); 1.5 s back-off, re-resolve port, force classic/JTAG reset.
-On a CH343 attempt, last try at 115200. On final failure: tell the user to hold
-BOOT, tap RST (or replug), and retry.
+**Retries:** up to 5 attempts on *connection* errors only (sync timeout, open
+failure, lost or busy port); 3 s back-off (≈15 s to replug — 3×1.5 s proved too
+short on hardware), re-resolve the board each time (app port → touch again;
+already in ROM → reset there; CH343 → same COM, classic reset). On a CH343 the
+last try stays at 115200. The NVS MD5 baseline is taken once and checked after
+the final write, so a failed attempt in between can't hide a change. On final
+failure: tell the user to hold BOOT, tap RST (or replug), and retry.
 
 ### 4.4 CH343 fallback (PCB 13)
 If the native image bootloops before `USB.begin()`, the native port never

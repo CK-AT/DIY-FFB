@@ -101,6 +101,8 @@ namespace DiyFfb
         private const int GatewayReconnectIntervalMs = 2000;
         private Timer gatewayReconnectTimer;
         private int gatewayReconnectBusy = 0;
+        private int gatewaySuspendCount = 0;
+        private long gatewayResumeReconnectUntilTicks = 0;
         private const uint XPlanePacketMagic = 0x46464244;
         private const ushort XPlanePacketVersion = 4;
         private const int XPlaneMaxRotors = 4;
@@ -4478,9 +4480,74 @@ namespace DiyFfb
             }
         }
 
+        /// <summary>
+        /// Releases the gateway port for a USB flash (Plan 29 §4.5): closes it and
+        /// keeps auto-reconnect away until the returned handle is disposed, so the
+        /// timer can't grab the port while the board re-enumerates. If the gateway
+        /// was connected, disposing allows a reconnect for a while even when
+        /// auto-reconnect is off, so a flash doesn't leave the user disconnected.
+        /// </summary>
+        public IDisposable SuspendGateway()
+        {
+            Interlocked.Increment(ref gatewaySuspendCount);
+            // A reconnect already past its suspend check finishes first; then we close.
+            SpinWait.SpinUntil(() => Volatile.Read(ref gatewayReconnectBusy) == 0, 5000);
+
+            bool wasOpen = false;
+            try
+            {
+                if (ESPsync_serialPort != null && ESPsync_serialPort.IsOpen)
+                {
+                    wasOpen = true;
+                    ESPsync_serialPort.Close();
+                }
+            }
+            catch (Exception)
+            {
+                // Port already gone; it's released either way.
+            }
+            if (wasOpen && ui != null)
+            {
+                ui.NotifyGatewayPortClosed();
+            }
+            return new GatewaySuspension(this, wasOpen);
+        }
+
+        private sealed class GatewaySuspension : IDisposable
+        {
+            private DiyFfbPlugin plugin;
+            private readonly bool reconnect;
+
+            public GatewaySuspension(DiyFfbPlugin plugin, bool reconnect)
+            {
+                this.plugin = plugin;
+                this.reconnect = reconnect;
+            }
+
+            public void Dispose()
+            {
+                DiyFfbPlugin p = Interlocked.Exchange(ref plugin, null);
+                if (p == null)
+                {
+                    return;
+                }
+                if (reconnect)
+                {
+                    Interlocked.Exchange(ref p.gatewayResumeReconnectUntilTicks, DateTime.UtcNow.AddSeconds(30).Ticks);
+                }
+                Interlocked.Decrement(ref p.gatewaySuspendCount);
+            }
+        }
+
         private void AutoReconnectGateway()
         {
-            if (Settings == null || !Settings.Pedal_ESPNow_auto_connect_flag)
+            if (Volatile.Read(ref gatewaySuspendCount) > 0)
+            {
+                return;
+            }
+
+            bool resuming = DateTime.UtcNow.Ticks < Interlocked.Read(ref gatewayResumeReconnectUntilTicks);
+            if (Settings == null || !(Settings.Pedal_ESPNow_auto_connect_flag || resuming))
             {
                 return;
             }
@@ -4515,6 +4582,13 @@ namespace DiyFfb
 
             try
             {
+                // Re-check under the busy flag: SuspendGateway waits for it, so
+                // either it sees us busy and waits, or we see it here and back off.
+                if (Volatile.Read(ref gatewaySuspendCount) > 0)
+                {
+                    return;
+                }
+
                 if (ESPsync_serialPort == null)
                 {
                     ESPsync_serialPort = new ProtobufSerial<Message>(portName, 3000000);
@@ -4525,6 +4599,7 @@ namespace DiyFfb
                 }
 
                 ESPsync_serialPort.Open();
+                Interlocked.Exchange(ref gatewayResumeReconnectUntilTicks, 0);
                 if (ui != null)
                 {
                     ui.NotifyGatewayPortAutoConnected(portName);

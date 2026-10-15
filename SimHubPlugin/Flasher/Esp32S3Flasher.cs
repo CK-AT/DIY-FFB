@@ -53,19 +53,25 @@ namespace DiyFfb.Flasher
             this.log = log ?? (_ => { });
         }
 
-        public void Flash(string portName, FirmwareImage image, FlashOptions options)
+        /// <summary>
+        /// Flashes <paramref name="image"/> through <paramref name="portName"/>.
+        /// Returns the COM port the board came back on as the same DIY-FFB device,
+        /// or null if it was flashed through a bootloader/UART port (identity
+        /// unknown) or didn't re-enumerate in time.
+        /// </summary>
+        public string Flash(string portName, FirmwareImage image, FlashOptions options)
         {
             IReadOnlyList<FlashSegment> segments = image.GetSegments(options.EraseNvs);
             log(options.EraseNvs
                 ? $"Writing full image ({image.Data.Length} bytes); stored configuration will be erased."
                 : $"Writing {segments.Count} segments, keeping NVS 0x{image.NvsOffset:X}+0x{image.NvsSize:X}.");
-            // Keep-config mode proves NVS survived: MD5 before and after, same ROM session.
+            // Keep-config mode proves NVS survived: MD5 before the first write and after the last.
             FlashSegment preserve = options.EraseNvs ? null : new FlashSegment(image.NvsOffset, new byte[image.NvsSize]);
-            Run(portName, image.FlashSizeBytes, options, segments, preserve);
+            return Run(portName, image.FlashSizeBytes, options, segments, preserve);
         }
 
         /// <summary>Wipes NVS only (the stored configuration), leaving the firmware intact.</summary>
-        public void EraseNvs(string portName, uint nvsOffset = DefaultNvsOffset, uint nvsSize = DefaultNvsSize)
+        public string EraseNvs(string portName, uint nvsOffset = DefaultNvsOffset, uint nvsSize = DefaultNvsSize)
         {
             var blank = new byte[nvsSize];
             for (int i = 0; i < blank.Length; i++)
@@ -74,15 +80,60 @@ namespace DiyFfb.Flasher
             }
             log($"Erasing NVS 0x{nvsOffset:X}+0x{nvsSize:X}.");
             // Flash size only bounds the ROM's address checks; NVS is far below 1 MB.
-            Run(portName, 0, new FlashOptions(), new[] { new FlashSegment(nvsOffset, blank) }, null);
+            return Run(portName, 0, new FlashOptions(), new[] { new FlashSegment(nvsOffset, blank) }, null);
         }
 
-        private void Run(string portName, uint flashSize, FlashOptions options, IReadOnlyList<FlashSegment> segments,
-                         FlashSegment preserve)
+        private const int Attempts = 5;
+        private const int RetryBackoffMs = 3000;
+        private const int ReappearTimeoutMs = 15000;
+
+        private string Run(string portName, uint flashSize, FlashOptions options, IReadOnlyList<FlashSegment> segments,
+                           FlashSegment preserve)
+        {
+            UsbPort target = FindPort(p => string.Equals(p.Com, portName, StringComparison.OrdinalIgnoreCase));
+            if (target == null)
+            {
+                throw new EspRomException($"{portName} is not present.");
+            }
+
+            string nvsBaseline = null;
+            for (int attempt = 1; ; attempt++)
+            {
+                bool lastAttempt = attempt == Attempts;
+                try
+                {
+                    Session(target, attempt > 1, lastAttempt, flashSize, options, segments, preserve, ref nvsBaseline);
+                    break;
+                }
+                catch (Exception ex) when (IsConnectionError(ex))
+                {
+                    if (lastAttempt)
+                    {
+                        throw new EspRomConnectionException(
+                            $"{ex.Message} Gave up after {Attempts} attempts. Hold BOOT, tap RST or replug the board, and flash again.");
+                    }
+                    log($"Attempt {attempt} failed: {ex.Message} Retrying...");
+                    Thread.Sleep(RetryBackoffMs);
+                }
+            }
+
+            return WaitForAppPort(target);
+        }
+
+        private static bool IsConnectionError(Exception ex)
+        {
+            // InvalidOperationException: SerialPort reports "port is closed" when
+            // the device vanished under an open handle.
+            return ex is EspRomConnectionException || ex is TimeoutException || ex is IOException
+                || ex is UnauthorizedAccessException || ex is InvalidOperationException;
+        }
+
+        private void Session(UsbPort target, bool retry, bool lastAttempt, uint flashSize, FlashOptions options,
+                             IReadOnlyList<FlashSegment> segments, FlashSegment preserve, ref string nvsBaseline)
         {
             Transport transport;
             bool resetFirst;
-            string romPort = EnterBootloader(portName, out transport, out resetFirst);
+            string romPort = EnterBootloader(target, retry, out transport, out resetFirst);
 
             using (var rom = new EspRomLoader(romPort) { Log = log })
             {
@@ -127,17 +178,18 @@ namespace DiyFfb.Flasher
                     rom.SpiSetParams(flashSize);
                 }
 
-                if (transport == Transport.Uart && options.UartBaud > 115200)
+                // The last attempt stays at the ROM's 115200 in case the bridge
+                // or cabling can't hold the higher rate.
+                if (transport == Transport.Uart && options.UartBaud > 115200 && !lastAttempt)
                 {
                     rom.ChangeBaud(options.UartBaud);
                     log($"Baud rate {options.UartBaud}.");
                 }
 
-                string preservedMd5 = null;
-                if (preserve != null)
+                if (preserve != null && nvsBaseline == null)
                 {
-                    preservedMd5 = rom.FlashMd5(preserve.Offset, (uint)preserve.Data.Length);
-                    log($"NVS 0x{preserve.Offset:X}+0x{preserve.Data.Length:X} MD5 before: {preservedMd5}");
+                    nvsBaseline = rom.FlashMd5(preserve.Offset, (uint)preserve.Data.Length);
+                    log($"NVS 0x{preserve.Offset:X}+0x{preserve.Data.Length:X} MD5 before: {nvsBaseline}");
                 }
 
                 long total = segments.Sum(s => (long)s.Data.Length);
@@ -155,10 +207,12 @@ namespace DiyFfb.Flasher
 
                 if (preserve != null)
                 {
+                    // Compared against the first session's baseline, so a failed
+                    // attempt in between can't hide a change.
                     string after = rom.FlashMd5(preserve.Offset, (uint)preserve.Data.Length);
-                    if (after != preservedMd5)
+                    if (after != nvsBaseline)
                     {
-                        throw new EspRomException($"NVS changed during flashing (MD5 {preservedMd5} -> {after}); stored configuration may be lost.");
+                        throw new EspRomException($"NVS changed during flashing (MD5 {nvsBaseline} -> {after}); stored configuration may be lost.");
                     }
                     log($"NVS unchanged ({after}): stored configuration preserved.");
                 }
@@ -182,38 +236,111 @@ namespace DiyFfb.Flasher
 
         // ------------------------------------------------------- ROM entry
 
-        private string EnterBootloader(string portName, out Transport transport, out bool resetFirst)
+        private static UsbPort FindPort(Func<UsbPort, bool> match)
         {
-            UsbPort port = UsbDeviceScanner.GetPorts(forceRefresh: true)
-                .FirstOrDefault(p => string.Equals(p.Com, portName, StringComparison.OrdinalIgnoreCase));
-            if (port == null)
-            {
-                throw new EspRomException($"{portName} is not present.");
-            }
+            return UsbDeviceScanner.GetPorts(forceRefresh: true).FirstOrDefault(match);
+        }
 
-            switch (port.Role)
+        private static bool IsAppRole(UsbPortRole role)
+        {
+            return role == UsbPortRole.Gateway || role == UsbPortRole.Axis || role == UsbPortRole.Grip;
+        }
+
+        private static bool SameDevice(UsbPort a, UsbPort b)
+        {
+            return a.Role == b.Role && a.Index == b.Index;
+        }
+
+        /// <summary>
+        /// Gets <paramref name="target"/> into the ROM and returns the port to talk to.
+        /// On a retry the board may be anywhere: back in the app (touch again),
+        /// already in the ROM from the failed attempt (reset it there), or gone.
+        /// </summary>
+        private string EnterBootloader(UsbPort target, bool retry, out Transport transport, out bool resetFirst)
+        {
+            if (IsAppRole(target.Role))
             {
-                case UsbPortRole.Gateway:
-                case UsbPortRole.Axis:
-                case UsbPortRole.Grip:
+                UsbPort app = FindPort(p => SameDevice(p, target));
+                if (app != null)
+                {
                     // Our app CDC: DTR/RTS do nothing by design (enableReboot(false));
                     // only a 1200 bps open reboots into the ROM.
-                    log($"Rebooting {port.Label} into the bootloader...");
-                    string romPort = TouchAndWaitForRom(port);
+                    log($"Rebooting {app.Label} into the bootloader...");
                     transport = Transport.UsbJtag;
                     resetFirst = false;
-                    return romPort;
+                    return TouchAndWaitForRom(app);
+                }
 
-                case UsbPortRole.EspRom:
-                    transport = port.Pid == 0x1001 ? Transport.UsbJtag : Transport.UsbOtg;
-                    resetFirst = transport == Transport.UsbJtag;
-                    return port.Com;
-
-                default:
-                    transport = Transport.Uart;
-                    resetFirst = true;
-                    return port.Com;
+                UsbPort rom = retry ? FindPort(p => p.Role == UsbPortRole.EspRom) : null;
+                if (rom == null)
+                {
+                    throw new EspRomConnectionException("The board is not connected.");
+                }
+                log($"Board is still in the bootloader on {rom.Com}.");
+                return RomPort(rom, out transport, out resetFirst);
             }
+
+            if (target.Role == UsbPortRole.EspRom)
+            {
+                // Same COM usually, but re-scan in case it re-enumerated elsewhere.
+                UsbPort rom = FindPort(p => string.Equals(p.Com, target.Com, StringComparison.OrdinalIgnoreCase))
+                    ?? FindPort(p => p.Role == UsbPortRole.EspRom);
+                if (rom == null)
+                {
+                    throw new EspRomConnectionException("The bootloader port is gone.");
+                }
+                return RomPort(rom, out transport, out resetFirst);
+            }
+
+            // USB-UART bridge with auto-program wiring: stable COM, classic reset every time.
+            if (FindPort(p => string.Equals(p.Com, target.Com, StringComparison.OrdinalIgnoreCase)) == null)
+            {
+                throw new EspRomConnectionException($"{target.Com} is gone.");
+            }
+            transport = Transport.Uart;
+            resetFirst = true;
+            return target.Com;
+        }
+
+        private static string RomPort(UsbPort rom, out Transport transport, out bool resetFirst)
+        {
+            transport = rom.Pid == 0x1001 ? Transport.UsbJtag : Transport.UsbOtg;
+            resetFirst = transport == Transport.UsbJtag;
+            WaitUntilOpenable(rom.Com);
+            return rom.Com;
+        }
+
+        /// <summary>
+        /// After the reset, wait for the board to re-enumerate as the same device
+        /// (its COM number may change). Null if its identity isn't known.
+        /// </summary>
+        private string WaitForAppPort(UsbPort target)
+        {
+            if (!IsAppRole(target.Role))
+            {
+                return null;
+            }
+
+            string candidate = null;
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            while (sw.ElapsedMilliseconds < ReappearTimeoutMs)
+            {
+                Thread.Sleep(250);
+                UsbPort app = FindPort(p => SameDevice(p, target));
+                if (app == null)
+                {
+                    candidate = null;
+                    continue;
+                }
+                if (app.Com == candidate)
+                {
+                    log($"Board is back as {app.Label}.");
+                    return app.Com;
+                }
+                candidate = app.Com;
+            }
+            log("Board flashed, but it hasn't re-enumerated yet; replug it if it doesn't come back.");
+            return null;
         }
 
         private string TouchAndWaitForRom(UsbPort appPort)
@@ -236,7 +363,7 @@ namespace DiyFfb.Flasher
             }
             catch (UnauthorizedAccessException)
             {
-                throw new EspRomException($"{appPort.Com} is in use by another program.");
+                throw new EspRomConnectionException($"{appPort.Com} is in use by another program.");
             }
 
             // Wait for a ROM port that wasn't there before, seen on two polls in a row.
@@ -258,7 +385,7 @@ namespace DiyFfb.Flasher
                 }
                 candidate = rom.Com;
             }
-            throw new EspRomException("The board didn't come back in bootloader mode. Hold BOOT, replug it, and flash the bootloader port.");
+            throw new EspRomConnectionException("The board didn't come back in bootloader mode.");
         }
 
         /// <summary>
@@ -287,7 +414,7 @@ namespace DiyFfb.Flasher
             }
             if (ok < 2)
             {
-                throw new EspRomException($"{com} appeared but can't be opened.");
+                throw new EspRomConnectionException($"{com} appeared but can't be opened.");
             }
             Thread.Sleep(300);
         }

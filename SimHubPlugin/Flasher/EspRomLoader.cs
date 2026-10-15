@@ -16,6 +16,15 @@ namespace DiyFfb.Flasher
     }
 
     /// <summary>
+    /// The link to the bootloader failed (no answer, port gone or busy), as
+    /// opposed to the ROM reporting an error. Worth a reset and another attempt.
+    /// </summary>
+    public class EspRomConnectionException : EspRomException
+    {
+        public EspRomConnectionException(string message) : base(message) { }
+    }
+
+    /// <summary>
     /// Talks to the ESP32 ROM serial bootloader directly (no flasher stub).
     /// Wire format and constants follow esptool 5.4.0 loader.py; see
     /// docs/plans/29_usb_port_detection_and_flasher.md §4.1.
@@ -138,7 +147,7 @@ namespace DiyFfb.Flasher
                     }
                 }
             }
-            throw new EspRomException($"No response from the ESP bootloader on {port.PortName}.");
+            throw new EspRomConnectionException($"No response from the ESP bootloader on {port.PortName}.");
         }
 
         // ----------------------------------------------------------- registers
@@ -342,7 +351,7 @@ namespace DiyFfb.Flasher
                     throw new EspRomException($"Command 0x{op:X2} is not supported by this bootloader.");
                 }
             }
-            throw new EspRomException($"No matching response to command 0x{op:X2}.");
+            throw new EspRomConnectionException($"No matching response to command 0x{op:X2}.");
         }
 
         private void WriteSlip(byte[] packet)
