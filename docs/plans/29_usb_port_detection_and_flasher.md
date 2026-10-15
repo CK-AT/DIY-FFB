@@ -147,8 +147,11 @@ All constants below were read from esptool **v5.4.0** as installed under
    Then hard reset (§4.3).
 7. Hand back to Part A: wait for `303B:82xx` to reappear; plugin reconnects.
 
-No stub: over USB-Serial/JTAG baud is irrelevant (full-speed USB). Measure on
-hardware; if ROM throughput is unacceptable, stub upload is a contained add-on
+No stub: over USB-Serial/JTAG baud is irrelevant (full-speed USB). Measured
+2026-10-15 on PCB 13: **18.1 ± 0.1 s per keep-config flash** (1.3 MB image:
+touch → ROM → write + verify → reset → re-enumerated), 20/20 back-to-back
+cycles. Fine for an update/recovery tool, so the stub stays out. If that ever
+changes, stub upload is a contained add-on
 (MEM_BEGIN/DATA/END + stub JSON) — but **check the stub's license first**.
 
 ### 4.3 Getting into the ROM (port-type table, from upstream 44369994)
@@ -298,7 +301,7 @@ check. Same code path as a normal write.
 |---|---|---|
 | **1** | `UsbDeviceScanner` + dropdown labels + `GatewayTarget` reconnect + first-run auto-select | renumber the COM port in Device Manager → plugin still reconnects |
 | **2** ✅ | ROM flasher core (`SimHubPlugin/Flasher/`: SLIP, commands, zlib, watchdog disable, MD5) + factory image in `.ffbota` + desk harness `FlasherTool` (no UI) | `.ffbota` from `pio run` flashes PCB 13; `esptool verify-flash` matches; device boots the new version with its config intact |
-| **3** | entry/reset/re-resolution (§4.3), retries, gateway yield (§4.5), force-download clear | 20× touch→flash→boot cycles from the running app with no manual intervention |
+| **3** ✅ | entry/reset/re-resolution (§4.3), retries, gateway yield (§4.5), force-download clear | 20× touch→flash→boot cycles from the running app with no manual intervention |
 | **4** | fetch the board's published `.ffbota` (URL derived from its `update_info.json` `.bin` URL; file unchanged; packaging itself moved to phase 2) | latest published package flashes via plugin; OTA of the same package still works |
 | **5** | Dialog UI, multi-device, factory reset | flash gateway + axis in one go; factory reset clears config |
 | **6** | CH343 recovery path (§4.4) — transport already validated in phase 2; remains: auto-offer in the dialog | flash a deliberately bootlooping image away over the CH343, hands-off |
