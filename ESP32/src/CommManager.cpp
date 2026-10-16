@@ -73,7 +73,7 @@ void CommManager::periodic_task_func(void) {
         }
         can_manager.process_isotp();
         uint32_t now = micros();
-        if ((now - ti_last_state_updates) > 100000) {
+        if ((now - ti_last_state_updates) > 10000) {
             ti_last_state_updates = now;
             uint8_t online_flags = 0;
             if (is_gateway()) {

@@ -142,7 +142,7 @@ class CommManager {
         ConfigManager *_config_manager;
         float _f_contact_point_own = 0.0f;
         float _x_contact_point_own = 0.0f;
-        uint32_t ti_last_state_updates = 0;
+        uint32_t ti_last_state_updates = 5000;
         uint32_t ti_last_joystick_update = 0;
         OnFFBAction _on_ffb_action;
         OnAxisAction _on_axis_action;

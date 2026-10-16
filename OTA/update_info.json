@@ -2,9 +2,9 @@
   "Configurations": [
     {
       "Board": "CK-AT_A6_V1.0",
-      "MD5": "8add289bf1ed582b0e4cc3d74b52fcb7",
-      "URL": "https://raw.githubusercontent.com/CK-AT/DIY-FFB/refs/heads/ck_heli_cues_rework/OTA/firmware_a6-ffb-v10-ck-at.bin",
-      "Version": "0.2.32"
+      "MD5": "984919ecc8e3075b0f38a25dfb2fbd1f",
+      "URL": "https://raw.githubusercontent.com/CK-AT/DIY-FFB/refs/heads/ck_telemffb_bridge/OTA/firmware_a6-ffb-v10-ck-at.bin",
+      "Version": "0.4.1"
     }
   ]
 }
