@@ -23,6 +23,7 @@ namespace DiyFfb
         private bool busy;
         private FirmwarePackage localPackage;
         private int lastProgress = -1;
+        private string recoveryHintShownFor;
 
         /// <param name="reportedBoard">Board name the connected devices report, to preselect; may be null.</param>
         public UsbFlashDialog(DiyFfbPlugin plugin, string infoUrl, string reportedBoard, string localPath)
@@ -50,11 +51,40 @@ namespace DiyFfb
 
             // Keep the user's pick; otherwise prefer the gateway, then any DIY-FFB
             // device, then a board already sitting in the bootloader.
-            ComboBox_Device.SelectedItem =
+            UsbPort pick =
                 ports.FirstOrDefault(p => p.Com == selected)
                 ?? ports.FirstOrDefault(p => p.Role == UsbPortRole.Gateway)
                 ?? ports.FirstOrDefault(p => p.Role == UsbPortRole.Axis)
                 ?? ports.FirstOrDefault(p => p.Role == UsbPortRole.EspRom);
+
+            // Nothing on native USB: a board whose image dies before USB.begin()
+            // only shows its CH343. Offer that for recovery (Plan 29 §4.4).
+            if (pick == null)
+            {
+                pick = FindRecoveryPort(ports);
+                if (pick != null && pick.Com != recoveryHintShownFor)
+                {
+                    recoveryHintShownFor = pick.Com;
+                    Log($"No DIY-FFB device on USB. Selected {pick.Label} to recover the board through its UART.");
+                }
+            }
+            ComboBox_Device.SelectedItem = pick;
+        }
+
+        /// <summary>
+        /// The CH343 (WCH, VID 1A86) to fall back to, if there is exactly one.
+        /// Nothing on the bus ties a CH343 to a particular board, so with several
+        /// the user picks.
+        /// </summary>
+        private static UsbPort FindRecoveryPort(IEnumerable<UsbPort> ports)
+        {
+            List<UsbPort> wch = ports.Where(p => p.Role == UsbPortRole.UsbUart && p.Vid == 0x1A86).ToList();
+            return wch.Count == 1 ? wch[0] : null;
+        }
+
+        private static bool IsAppPort(UsbPort port)
+        {
+            return port.Role == UsbPortRole.Gateway || port.Role == UsbPortRole.Axis || port.Role == UsbPortRole.Grip;
         }
 
         private void ComboBox_Device_DropDownOpened(object sender, EventArgs e)
@@ -186,11 +216,33 @@ namespace DiyFfb
 
             SetBusy(true);
             TextBox_Log.Clear();
+            FirmwarePackage package = null;
+            UsbPort recovery = null;
             try
             {
-                FirmwarePackage package = useLocal ? localPackage : null;
-                await Task.Run(() => Flash(port, package ?? DownloadPublished(published), eraseNvs));
+                package = useLocal ? localPackage : await Task.Run(() => DownloadPublished(published));
+                await Task.Run(() => Flash(port, package, eraseNvs));
                 Log("Done.");
+            }
+            catch (EspRomConnectionException ex) when (package != null && IsAppPort(port)
+                && (recovery = FindRecoveryPort(UsbDeviceScanner.GetPorts(forceRefresh: true))) != null)
+            {
+                // Native USB gave up (e.g. the new image crashes before USB comes
+                // up). The CH343's auto-program wiring doesn't depend on the app.
+                Log($"FAILED: {ex.Message}");
+                if (Confirm($"Flashing over the board's USB failed.\n\nTry again through {recovery.Label}? " +
+                            "That uses the board's UART and works even if its firmware doesn't start."))
+                {
+                    try
+                    {
+                        await Task.Run(() => Flash(recovery, package, eraseNvs));
+                        Log("Done.");
+                    }
+                    catch (Exception ex2)
+                    {
+                        Log($"FAILED: {ex2.Message}");
+                    }
+                }
             }
             catch (Exception ex)
             {
