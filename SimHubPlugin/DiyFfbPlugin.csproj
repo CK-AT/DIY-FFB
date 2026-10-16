@@ -286,6 +286,9 @@
     <Compile Include="OtaSelectionDialog.xaml.cs">
       <DependentUpon>OtaSelectionDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UsbFlashDialog.xaml.cs">
+      <DependentUpon>UsbFlashDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="OtaTargetEntry.cs" />
     <Compile Include="SaveSelectionDialog.xaml.cs">
       <DependentUpon>SaveSelectionDialog.xaml</DependentUpon>
@@ -428,6 +431,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="OtaSelectionDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UsbFlashDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

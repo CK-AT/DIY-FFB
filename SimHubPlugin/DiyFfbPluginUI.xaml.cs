@@ -53,6 +53,10 @@ namespace DiyFfb
         private readonly Dictionary<string, LogSourceFilterItem> logSourceFilterLookup = new Dictionary<string, LogSourceFilterItem>();
         private readonly Dictionary<AxisID, string> ota_axis_versions = new Dictionary<AxisID, string>();
         private readonly Dictionary<GatewayID, string> ota_gateway_versions = new Dictionary<GatewayID, string>();
+        // Board name the devices report in DeviceInfo (gateway's wins), to preselect firmware.
+        private string reportedBoard;
+        private bool reportedBoardFromGateway;
+        private UsbFlashDialog usbFlashDialog;
         private GatewayID last_gateway_id = GatewayID.GatewayUndefined;
         private readonly HashSet<AxisID> seenAxisSources = new HashSet<AxisID>();
         private readonly HashSet<GatewayID> seenGatewaySources = new HashSet<GatewayID>();
@@ -292,6 +296,28 @@ namespace DiyFfb
             return null;
         }
 
+        /// <summary>
+        /// The one place OnMessage is (un)subscribed, so a port object never
+        /// carries the handler twice -- e.g. a manual Connect followed by an
+        /// auto-reconnect after a USB flash or replug would otherwise double every message.
+        /// </summary>
+        private void AttachGatewayPort(ProtobufSerial<Message> port)
+        {
+            if (attachedGatewayPort == port)
+            {
+                return;
+            }
+            if (attachedGatewayPort != null)
+            {
+                attachedGatewayPort.OnMessage -= OnMessage;
+            }
+            if (port != null)
+            {
+                port.OnMessage += OnMessage;
+            }
+            attachedGatewayPort = port;
+        }
+
         /// <summary>The plugin released the gateway port (USB flash); show it as disconnected.</summary>
         public void NotifyGatewayPortClosed()
         {
@@ -321,15 +347,7 @@ namespace DiyFfb
                 return;
             }
 
-            if (attachedGatewayPort != Plugin.ESPsync_serialPort)
-            {
-                if (attachedGatewayPort != null)
-                {
-                    attachedGatewayPort.OnMessage -= OnMessage;
-                }
-                Plugin.ESPsync_serialPort.OnMessage += OnMessage;
-                attachedGatewayPort = Plugin.ESPsync_serialPort;
-            }
+            AttachGatewayPort(Plugin.ESPsync_serialPort);
 
             UsbPort item = FindPortItem(portName);
             if (item != null)
@@ -1590,6 +1608,19 @@ namespace DiyFfb
             dialog.ShowDialog();
         }
 
+        private void btn_usb_flash_Click(object sender, RoutedEventArgs e)
+        {
+            if (usbFlashDialog != null)
+            {
+                usbFlashDialog.Activate();
+                return;
+            }
+
+            usbFlashDialog = new UsbFlashDialog(Plugin, GetOtaInfoUrl(), reportedBoard, Plugin?.Settings.OtaLocalFfbotaPath);
+            usbFlashDialog.Closed += (s, args) => usbFlashDialog = null;
+            usbFlashDialog.Show();
+        }
+
         private void btn_start_ota_Click(object sender, RoutedEventArgs e)
         {
             if (Plugin == null || Plugin.ESPsync_serialPort == null || !Plugin.ESPsync_serialPort.IsOpen)
@@ -1854,6 +1885,15 @@ namespace DiyFfb
 
         private void UpdateOtaDeviceInfo(DeviceInfo info)
         {
+            if (!string.IsNullOrWhiteSpace(info.Board))
+            {
+                bool fromGateway = info.GatewayId != GatewayID.GatewayUndefined;
+                if (fromGateway || !reportedBoardFromGateway)
+                {
+                    reportedBoard = info.Board;
+                    reportedBoardFromGateway = fromGateway;
+                }
+            }
             if (info.AxisId != AxisID.AxisUndefined && ota_axis_targets.TryGetValue(info.AxisId, out var axisEntry))
             {
                 axisEntry.LatestVersion = string.IsNullOrWhiteSpace(info.FwVersion) ? "-" : info.FwVersion;
@@ -1932,7 +1972,7 @@ namespace DiyFfb
             try
             {
                 Plugin.ESPsync_serialPort = new ProtobufSerial<Message>(portName, 3000000);
-                Plugin.ESPsync_serialPort.OnMessage += OnMessage;
+                AttachGatewayPort(Plugin.ESPsync_serialPort);
                 Plugin.ESPsync_serialPort.Open();
                 Label_Status.Text = "Connected";
                 btn_connect_espnow_port.Content = "Disconnect";
@@ -1955,9 +1995,9 @@ namespace DiyFfb
 
             try
             {
+                AttachGatewayPort(null);
                 if (Plugin.ESPsync_serialPort != null)
                 {
-                    Plugin.ESPsync_serialPort.OnMessage -= OnMessage;
                     Plugin.ESPsync_serialPort.Close();
                 }
             }

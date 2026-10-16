@@ -1,0 +1,74 @@
+<Window x:Class="DiyFfb.UsbFlashDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:styles="clr-namespace:SimHub.Plugins.Styles;assembly=SimHub.Plugins"
+        mc:Ignorable="d"
+        WindowStyle="None" Width="540" SizeToContent="Height"
+        Background="#FF252525" BorderBrush="Gray" Foreground="White" BorderThickness="1"
+        MouseDown="Window_MouseDown" Closing="Window_Closing"
+        ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True">
+    <StackPanel Orientation="Vertical" Background="#FF252525" Margin="0,0,0,12">
+        <Label Content="USB Flash" FontFamily="Arial Black" HorizontalContentAlignment="Center" />
+
+        <Grid Margin="12,4,12,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Text="Device" FontFamily="Arial Black" FontSize="10" VerticalAlignment="Center"/>
+            <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" x:Name="ComboBox_Device" Height="22" Margin="0,2,0,2"
+                      DropDownOpened="ComboBox_Device_DropDownOpened"
+                      ToolTip="A running DIY-FFB device, the ESP32-S3 bootloader port, or a USB-UART bridge (e.g. the CH343)"/>
+
+            <TextBlock Grid.Row="1" Text="Firmware" FontFamily="Arial Black" FontSize="10" VerticalAlignment="Center"/>
+            <RadioButton Grid.Row="1" Grid.Column="1" x:Name="Radio_Published" Content="Published" IsChecked="True" Foreground="White"
+                         VerticalAlignment="Center" Margin="0,4,0,2" Checked="Radio_Source_Checked"/>
+            <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" x:Name="ComboBox_Published" Height="22" Margin="18,2,0,2"
+                      SelectionChanged="ComboBox_Published_SelectionChanged"/>
+            <RadioButton Grid.Row="3" Grid.Column="1" x:Name="Radio_Local" Content="Local .ffbota" Foreground="White"
+                         VerticalAlignment="Center" Margin="0,4,0,2" Checked="Radio_Source_Checked"/>
+            <TextBox Grid.Row="4" Grid.Column="1" x:Name="TextBox_LocalPath" Height="22" Margin="18,2,6,2" IsReadOnly="True"
+                     Background="#1F252525" BorderBrush="#4E4E4E" Foreground="White" VerticalContentAlignment="Center"/>
+            <styles:SHButtonPrimary Grid.Row="4" Grid.Column="2" x:Name="btn_browse" Click="btn_browse_Click" Width="70" Height="22"
+                                    Content="Browse" Padding="0,0,0,0" FontSize="10" MinHeight="20"/>
+            <TextBlock Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" x:Name="TextBlock_Package" Text="-" FontSize="10"
+                       Margin="18,2,0,4" TextWrapping="Wrap" Foreground="#FFBDBDBD"/>
+        </Grid>
+
+        <Grid Margin="12,4,12,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Mode" FontFamily="Arial Black" FontSize="10" VerticalAlignment="Top" Margin="0,4,0,0"/>
+            <StackPanel Grid.Column="1" Orientation="Vertical">
+                <RadioButton x:Name="Radio_Update" Content="Update (keep stored configuration)" IsChecked="True" Foreground="White" Margin="0,4,0,2"/>
+                <RadioButton x:Name="Radio_FactoryReset" Content="Factory reset (erase stored configuration)" Foreground="White" Margin="0,2,0,2"/>
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10,10,10,6">
+            <styles:SHButtonPrimary x:Name="btn_close" Click="btn_close_Click" Width="120" Height="28" Content="Close" Margin="0,0,5,0"
+                                    VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0,0,0,0"/>
+            <styles:SHButtonPrimary x:Name="btn_flash" Click="btn_flash_Click" Width="160" Height="28" Content="Flash"
+                                    VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0,0,0,0"/>
+        </StackPanel>
+
+        <ProgressBar x:Name="ProgressBar_Flash" Height="8" Margin="12,0,12,6" Minimum="0" Maximum="1000" Value="0"/>
+        <TextBox x:Name="TextBox_Log" Height="150" Margin="12,0,12,0" IsReadOnly="True" TextWrapping="Wrap"
+                 VerticalScrollBarVisibility="Auto" Background="#1F252525" BorderBrush="#4E4E4E" BorderThickness="1"
+                 Foreground="White" FontFamily="Consolas" FontSize="10"/>
+    </StackPanel>
+</Window>

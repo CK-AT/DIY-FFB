@@ -886,6 +886,9 @@
                                                     <StackPanel Orientation="Horizontal" Margin="70,4,0,0">
                                                         <styles:SHButtonPrimary x:Name="btn_start_ota" Click="btn_start_ota_Click" Width="160" Content="Begin OTA Update" Height="22" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" />
                                                     </StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="70,4,0,0">
+                                                        <styles:SHButtonPrimary x:Name="btn_usb_flash" Click="btn_usb_flash_Click" Width="160" Content="USB Flash..." Height="22" Padding="0,0,0,0" VerticalContentAlignment="Center" FontFamily="Arial" FontSize="10" MinHeight="20" ToolTip="Flash a board over USB (no WiFi needed; also recovers a board that won't boot)" />
+                                                    </StackPanel>
                                                 </StackPanel>
                                             </Border>
                                         </TabItem>
